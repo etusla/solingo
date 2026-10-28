@@ -8,12 +8,13 @@ Solingo araç içi / bambu peçete koleksiyonu için tek sayfalık tanıtım sit
 
 Tasarım, seri ve "an" verileri `assets/app.js` içindeki `DESIGNS`, `SERIES` ve `MOMENTS` dizilerindedir. Teklif formunun gideceği e-posta adresi aynı dosyanın başındaki `CONFIG.email` alanından ayarlanır.
 
-## Cloudflare Pages ile yayınlama
+## Cloudflare ile yayınlama
 
-1. Cloudflare panelinde **Workers & Pages → Create → Pages → Connect to Git** seçin.
-2. `etusla/solingo` deposunu ve `main` dalını seçin.
-3. Framework preset: **None**, Build command: *boş*, Build output directory: `/`.
-4. **Save and Deploy**. Her `main` push'unda site otomatik güncellenir.
+Depoda `wrangler.toml` hazır; ek ayar gerekmez.
+
+1. Cloudflare panelinde **Workers & Pages → Create → Import a repository** seçin.
+2. `etusla/solingo` deposunu seçip varsayılan ayarlarla **Deploy** edin.
+3. Site `solingo.<hesap>.workers.dev` adresinde yayına girer; her `main` push'unda otomatik güncellenir.
 
 ## Yerelde çalıştırma
 
