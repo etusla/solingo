@@ -145,6 +145,7 @@ h1 em,h2 em{font-style:italic;color:var(--gold)}
 .footer{padding:34px 0 40px;border-top:1px solid rgba(255,255,255,.08)}
 .foot-in{display:flex;flex-wrap:wrap;gap:12px 30px;align-items:center;justify-content:space-between}
 .footer p{margin:0;color:var(--soft);font-size:.88rem;letter-spacing:.08em}
+.ver{opacity:.55}
 
 /* lightbox */
 .lb{border:0;padding:0;width:min(720px,calc(100% - 32px));border-radius:26px;background:#f4f3f0;overflow:visible;color:var(--ink)}
