@@ -2,7 +2,7 @@
   "use strict";
 
   // Teklif e-postasının gönderileceği adres. Boş bırakılırsa e-posta uygulaması alıcısız açılır.
-  const CONFIG = { email: "" };
+  const CONFIG = { email: "i.yldz2106@gmail.com" };
 
   const IMG = "assets/img/";
 
