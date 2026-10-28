@@ -2,11 +2,11 @@
 
 Solingo araç içi / bambu peçete koleksiyonu için tek sayfalık tanıtım sitesi. Derleme adımı yoktur; saf HTML, CSS ve JavaScript.
 
-- `index.html` — sayfa
-- `assets/style.css`, `assets/app.js` — stil ve etkileşim (koleksiyon filtresi, anlar, detay penceresi, seçki ve teklif formu)
-- `assets/img/` — ürün görselleri (WebP)
+- `public/index.html` — sayfa
+- `public/assets/style.css`, `public/assets/app.js` — stil ve etkileşim (koleksiyon filtresi, anlar, detay penceresi, seçki ve teklif formu)
+- `public/assets/img/` — ürün görselleri (WebP)
 
-Tasarım, seri ve "an" verileri `assets/app.js` içindeki `DESIGNS`, `SERIES` ve `MOMENTS` dizilerindedir. Teklif formunun gideceği e-posta adresi aynı dosyanın başındaki `CONFIG.email` alanından ayarlanır.
+Tasarım, seri ve "an" verileri `public/assets/app.js` içindeki `DESIGNS`, `SERIES` ve `MOMENTS` dizilerindedir. Teklif formunun gideceği e-posta adresi aynı dosyanın başındaki `CONFIG.email` alanından ayarlanır.
 
 ## Cloudflare ile yayınlama
 
@@ -19,5 +19,5 @@ Depoda `wrangler.toml` hazır; ek ayar gerekmez.
 ## Yerelde çalıştırma
 
 ```sh
-python3 -m http.server 8000
+python3 -m http.server 8000 -d public
 ```
