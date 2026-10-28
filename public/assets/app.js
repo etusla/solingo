@@ -23,13 +23,13 @@
   const nameOf = id => DESIGNS.find(d => d.id === id).name;
 
   const MOMENTS = [
-    { word: "Araç İçi",     design: "tropik",         bg: "#0f2238" },
-    { word: "Mutfak",       design: "kir-cicekleri",  bg: "#15362c" },
-    { word: "Ofis",         design: "geometrik-mint", bg: "#24343d" },
-    { word: "Film Gecesi",  design: "suluboya",       bg: "#1e1442" },
-    { word: "Hasta Günler", design: "pastel-bahce",   bg: "#3a2134" },
-    { word: "Hastane",      design: "aycicegi",       bg: "#16303b" },
-    { word: "Yolculuk",     design: "gelincik",       bg: "#2c1820" }
+    { name: "Araç İçi",     line: "Yollarda",          design: "tropik",         bg: "#0f2238" },
+    { name: "Mutfak",       line: "Sofrada",           design: "kir-cicekleri",  bg: "#15362c" },
+    { name: "Ofis",         line: "Mesaide",           design: "geometrik-mint", bg: "#24343d" },
+    { name: "Film Gecesi",  line: "Ağlarken",          design: "suluboya",       bg: "#1e1442" },
+    { name: "Hasta Günler", line: "Hapşırınca",        design: "pastel-bahce",   bg: "#3a2134" },
+    { name: "Hastane",      line: "Zor günde",         design: "aycicegi",       bg: "#16303b" },
+    { name: "Yolculuk",     line: "Her yolculukta",    design: "gelincik",       bg: "#2c1820" }
   ];
   const BASE_BG = "#141a35";
 
@@ -57,8 +57,8 @@
   // ---------- an kelimeleri ----------
   const words = document.getElementById("words");
   const ticks = document.getElementById("ticks");
-  words.innerHTML = MOMENTS.map((m, i) => `<p class="word${i === 0 ? " on" : ""}" data-i="${i}">${m.word}</p>`).join("");
-  ticks.innerHTML = MOMENTS.map((m, i) => `<li class="${i === 0 ? "on" : ""}">${m.word}</li>`).join("");
+  words.innerHTML = MOMENTS.map((m, i) => `<p class="word${i === 0 ? " on" : ""}" data-i="${i}">${m.line} <em>yanında.</em></p>`).join("");
+  ticks.innerHTML = MOMENTS.map((m, i) => `<li class="${i === 0 ? "on" : ""}">${m.name}</li>`).join("");
   words.querySelectorAll(".word").forEach(split);
   words.querySelectorAll(".word").forEach(w => w.querySelectorAll(".ch").forEach((c, k) => c.style.setProperty("--d", `${k * 35}ms`)));
 
@@ -180,7 +180,7 @@
     if (name === "hero") { heroCycle(); setBg(BASE_BG); }
     else clearInterval(heroTimer);
     if (name === "moments") { momentIdx = -1; }
-    if (name === "contact") { stage() && stage().setDesign("signature"); setBg(BASE_BG); }
+    if (name === "contact" || name === "outro") { stage() && stage().setDesign("signature"); setBg(BASE_BG); }
     document.body.dataset.region = name;
   }
 
@@ -217,7 +217,7 @@
     });
     gsap.to(".waves", { yPercent: 18, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-    document.querySelectorAll(".g-head .split, .contact .split").forEach(h => {
+    document.querySelectorAll(".g-head .split, .contact .split, .outro .split").forEach(h => {
       gsap.from(h.querySelectorAll(".ch"), {
         yPercent: 110, opacity: 0, duration: 0.8, stagger: 0.02, ease: "power3.out",
         scrollTrigger: { trigger: h, start: "top 85%" }

@@ -25,18 +25,19 @@
 
   // ---------- desen verisi ----------
   // lid: kapak kenarı, label: kapak etiketi, ink: etiket yazısı
+  // rim: kapak kenarı rengi; pattern: kenar gövde deseniyle sarılı
   const LIDS = {
-    signature:        { lid: "#1d2547", label: "#1d2547", ink: "#d8c38f", serif: true },
-    tropik:           { lid: "#1b2347", label: "#f4f4f2", ink: "#1b2347" },
-    aycicegi:         { lid: "#1c2034", label: "#f2f1ee", ink: "#1c2034" },
-    gelincik:         { lid: "#16181c", label: "#f3f3f3", ink: "#16181c" },
-    "kir-cicekleri":  { lid: "#1f4436", label: "#f1f1ee", ink: "#1f4436" },
-    suluboya:         { lid: "#f2eeea", label: "#15192a", ink: "#ffffff" },
-    "pastel-bahce":   { lid: "#141414", label: "#f4f4f4", ink: "#141414" },
-    mozaik:           { lid: "#14161f", label: "#f2f0ec", ink: "#14161f" },
-    retro:            { lid: "#151a2a", label: "#f6f1ea", ink: "#151a2a" },
-    "geometrik-mint": { lid: "#a3bab8", label: "#ebe6d8", ink: "#93aba9" },
-    "geometrik-sari": { lid: "#f2cf2e", label: "#ffffff", ink: "#161616" }
+    signature:        { rim: "#1d2547" },
+    tropik:           { rim: "#1b2347", pattern: true },
+    aycicegi:         { rim: "#1c2034", pattern: true },
+    gelincik:         { rim: "#17191e" },
+    "kir-cicekleri":  { rim: "#1f4436" },
+    suluboya:         { rim: "#f2eeea", pattern: true },
+    "pastel-bahce":   { rim: "#151515" },
+    mozaik:           { rim: "#14161f" },
+    retro:            { rim: "#161b2b" },
+    "geometrik-mint": { rim: "#9fb6b4" },
+    "geometrik-sari": { rim: "#f2cf2e", pattern: true }
   };
 
   // ---------- doku üreticileri ----------
@@ -108,26 +109,32 @@
     return prep(t);
   }
 
-  function lidTexture(id) {
-    const d = LIDS[id] || LIDS.signature;
+  function signatureTop() {
     const S = 1024, c = document.createElement("canvas");
     c.width = c.height = S;
-    const g = c.getContext("2d");
-    g.fillStyle = d.lid; g.fillRect(0, 0, S, S);
-    const r = S / 2;
-    // kenar halkası
+    const g = c.getContext("2d"), r = S / 2;
+    g.fillStyle = "#1d2547"; g.fillRect(0, 0, S, S);
     const rg = g.createRadialGradient(r, r, r * 0.7, r, r, r);
-    rg.addColorStop(0, "rgba(255,255,255,0)"); rg.addColorStop(.92, "rgba(255,255,255,.10)"); rg.addColorStop(1, "rgba(0,0,0,.25)");
+    rg.addColorStop(0, "rgba(255,255,255,0)"); rg.addColorStop(.93, "rgba(255,255,255,.08)"); rg.addColorStop(1, "rgba(0,0,0,.3)");
     g.fillStyle = rg; g.fillRect(0, 0, S, S);
-    g.beginPath(); g.arc(r, r, r * 0.8, 0, Math.PI * 2); g.fillStyle = d.label; g.fill();
-    if (d.serif) {
-      g.lineWidth = 6; g.strokeStyle = d.ink;
-      g.beginPath(); g.arc(r, r, r * 0.72, 0, Math.PI * 2); g.stroke();
-    }
-    g.fillStyle = d.ink; g.textAlign = "center"; g.textBaseline = "middle";
-    g.font = d.serif ? '600 190px "Cormorant Garamond", Georgia, serif' : 'italic 800 150px "Exo 2", "Manrope", sans-serif';
-    g.fillText("Solingo", r, r + (d.serif ? 6 : 4));
+    g.strokeStyle = "#d8c38f"; g.lineWidth = 5;
+    g.beginPath(); g.arc(r, r, r * 0.66, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 2;
+    g.beginPath(); g.arc(r, r, r * 0.62, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = "#d8c38f"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = '600 170px "Cormorant Garamond", Georgia, serif';
+    g.fillText("Solingo", r, r + 6);
     return prep(new THREE.CanvasTexture(c));
+  }
+
+  function topTexture(id) {
+    const key = id + ":top";
+    if (texCache[key]) return texCache[key];
+    const p = id === "signature"
+      ? Promise.resolve(signatureTop())
+      : new Promise(res => loader.load(`assets/tex/${id}-top.webp`, t => res(prep(t)), undefined, () => res(null)));
+    texCache[key] = p;
+    return p;
   }
 
   function bodyTexture(id) {
@@ -140,7 +147,7 @@
   }
 
   // ---------- kutu ----------
-  const R = 1, BODY = 4.25, LIDH = 0.42;
+  const R = 1, BODY = 4.1, LIDH = 0.17, LIDR = 1.03;
   const can = new THREE.Group();
   const tilt = new THREE.Group();
   tilt.add(can);
@@ -149,62 +156,113 @@
   const blank = new THREE.DataTexture(new Uint8Array([30, 37, 71, 255]), 1, 1, THREE.RGBAFormat);
   blank.needsUpdate = true;
 
+  // tüm parçalar aynı geçiş değerini paylaşır
+  const shared = {
+    mixv: { value: 0 },
+    lightDir: { value: new THREE.Vector3(-0.45, 0.55, 1).normalize() }
+  };
+
+  const COMMON = `
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+    float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
+    vec3 dissolve(vec3 a, vec3 b, vec2 q, float mixv){
+      float n = noise(q * vec2(14.0, 9.0)) * 0.6 + noise(q * vec2(40.0, 30.0)) * 0.4;
+      float edge = mixv * 1.25 - 0.12;
+      float m = smoothstep(edge - 0.06, edge + 0.02, 1.0 - n);
+      m = mixv >= 0.999 ? 1.0 : m;
+      vec3 col = mix(a, b, m);
+      float glow = (1.0 - smoothstep(0.0, 0.07, abs((1.0 - n) - edge))) * step(0.001, mixv) * step(mixv, 0.999);
+      return col + vec3(1.0, 0.82, 0.45) * glow * 1.4;
+    }
+    vec3 shade(vec3 col, vec3 N, vec3 V, vec3 L, float rimAmt){
+      float dif = 0.86 + 0.22 * max(dot(N, L), 0.0);
+      vec3 H = normalize(L + V);
+      float spec = pow(max(dot(N, H), 0.0), 48.0) * 0.2;
+      float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+      return col * dif + spec + vec3(0.83, 0.75, 0.56) * rim * rimAmt;
+    }`;
+  const VERT = `
+    varying vec2 vUv; varying vec3 vN; varying vec3 vView;
+    void main(){
+      vUv = uv;
+      vec4 wp = modelMatrix * vec4(position,1.0);
+      vN = normalize(mat3(modelMatrix) * normal);
+      vView = normalize(cameraPosition - wp.xyz);
+      gl_Position = projectionMatrix * viewMatrix * wp;
+    }`;
+
   const bodyMat = new THREE.ShaderMaterial({
-    uniforms: {
-      tA: { value: blank }, tB: { value: blank }, mixv: { value: 0 },
-      time: { value: 0 }, lightDir: { value: new THREE.Vector3(-0.45, 0.55, 1).normalize() }
-    },
-    vertexShader: `
-      varying vec2 vUv; varying vec3 vN; varying vec3 vView;
-      void main(){
-        vUv = uv;
-        vec4 wp = modelMatrix * vec4(position,1.0);
-        vN = normalize(mat3(modelMatrix) * normal);
-        vView = normalize(cameraPosition - wp.xyz);
-        gl_Position = projectionMatrix * viewMatrix * wp;
-      }`,
+    uniforms: { tA: { value: blank }, tB: { value: blank }, mixv: shared.mixv, lightDir: shared.lightDir },
+    vertexShader: VERT,
     fragmentShader: `
-      uniform sampler2D tA; uniform sampler2D tB; uniform float mixv; uniform float time; uniform vec3 lightDir;
+      uniform sampler2D tA; uniform sampler2D tB; uniform float mixv; uniform vec3 lightDir;
       varying vec2 vUv; varying vec3 vN; varying vec3 vView;
-      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
-      float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
-        return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
+      ${COMMON}
       void main(){
         float th = vUv.x * 6.2831853;
         vec2 t = vec2(0.5 + 0.5 * sin(th), vUv.y);
-        vec3 a = texture2D(tA, t).rgb;
-        vec3 b = texture2D(tB, t).rgb;
-        float n = noise(vec2(vUv.x*14.0, vUv.y*9.0)) * 0.6 + noise(vec2(vUv.x*40.0, vUv.y*30.0)) * 0.4;
-        float edge = mixv * 1.25 - 0.12;
-        float m = smoothstep(edge - 0.06, edge + 0.02, 1.0 - n);
-        m = mixv >= 0.999 ? 1.0 : m;
-        vec3 col = mix(a, b, m);
-        float glow = (1.0 - smoothstep(0.0, 0.07, abs((1.0 - n) - edge))) * step(0.001, mixv) * step(mixv, 0.999);
-        col += vec3(1.0, 0.82, 0.45) * glow * 1.4;
-        vec3 N = normalize(vN);
-        float dif = 0.86 + 0.22 * max(dot(N, lightDir), 0.0);
-        vec3 H = normalize(lightDir + vView);
-        float spec = pow(max(dot(N, H), 0.0), 48.0) * 0.22;
-        float rim = pow(1.0 - max(dot(N, vView), 0.0), 3.0);
-        col = col * dif + spec + vec3(0.83, 0.75, 0.56) * rim * 0.28;
+        vec3 col = dissolve(texture2D(tA, t).rgb, texture2D(tB, t).rgb, vUv, mixv);
+        col = shade(col, normalize(vN), vView, lightDir, 0.28);
         if (cos(th) < 0.0) col *= 0.82;
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  });
+
+  // kapak kenarı: düz renk ya da gövde deseninin üst bandı
+  const rimMat = new THREE.ShaderMaterial({
+    uniforms: {
+      tA: { value: blank }, tB: { value: blank }, cA: { value: new THREE.Color("#1d2547") }, cB: { value: new THREE.Color("#1d2547") },
+      pA: { value: 0 }, pB: { value: 0 }, mixv: shared.mixv, lightDir: shared.lightDir
+    },
+    vertexShader: VERT,
+    fragmentShader: `
+      uniform sampler2D tA; uniform sampler2D tB; uniform vec3 cA; uniform vec3 cB; uniform float pA; uniform float pB;
+      uniform float mixv; uniform vec3 lightDir;
+      varying vec2 vUv; varying vec3 vN; varying vec3 vView;
+      ${COMMON}
+      void main(){
+        float th = vUv.x * 6.2831853;
+        vec2 t = vec2(0.5 + 0.5 * sin(th), 0.94 + vUv.y * 0.05);
+        vec3 a = mix(cA, texture2D(tA, t).rgb, pA);
+        vec3 b = mix(cB, texture2D(tB, t).rgb, pB);
+        vec3 col = dissolve(a, b, vUv, mixv);
+        col = shade(col, normalize(vN), vView, lightDir, 0.2);
+        col *= 0.9 + 0.1 * vUv.y;
+        if (cos(th) < 0.0) col *= 0.82;
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  });
+
+  const topMat = new THREE.ShaderMaterial({
+    uniforms: { tA: { value: blank }, tB: { value: blank }, mixv: shared.mixv, lightDir: shared.lightDir },
+    vertexShader: VERT,
+    fragmentShader: `
+      uniform sampler2D tA; uniform sampler2D tB; uniform float mixv; uniform vec3 lightDir;
+      varying vec2 vUv; varying vec3 vN; varying vec3 vView;
+      ${COMMON}
+      void main(){
+        vec3 col = dissolve(texture2D(tA, vUv).rgb, texture2D(tB, vUv).rgb, vUv, mixv);
+        col = shade(col, normalize(vN), vView, lightDir, 0.0);
         gl_FragColor = vec4(col, 1.0);
       }`
   });
 
   const body = new THREE.Mesh(new THREE.CylinderGeometry(R, R, BODY, 160, 1, true), bodyMat);
   can.add(body);
-
-  const lidSide = new THREE.MeshStandardMaterial({ color: 0x1d2547, roughness: 0.55, metalness: 0.05 });
-  const lid = new THREE.Mesh(new THREE.CylinderGeometry(R * 1.035, R * 1.035, LIDH, 160, 1, true), lidSide);
-  lid.position.y = BODY / 2 - LIDH / 2 + 0.06;
+  const lidY = BODY / 2 + 0.07;
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(LIDR, LIDR, LIDH, 160, 1, true), rimMat);
+  lid.position.y = lidY - LIDH / 2;
   can.add(lid);
-  const lidTopMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
-  const lidTop = new THREE.Mesh(new THREE.CircleGeometry(R * 1.035, 160), lidTopMat);
+  const lidTop = new THREE.Mesh(new THREE.CircleGeometry(LIDR, 160), topMat);
   lidTop.rotation.x = -Math.PI / 2;
-  lidTop.position.y = BODY / 2 + 0.06;
+  lidTop.position.y = lidY;
   can.add(lidTop);
-  const bottom = new THREE.Mesh(new THREE.CircleGeometry(R, 64), new THREE.MeshStandardMaterial({ color: 0xdcd8cf }));
+  const lidUnder = new THREE.Mesh(new THREE.RingGeometry(R * 0.99, LIDR, 160), new THREE.MeshBasicMaterial({ color: 0x0b0d16, side: THREE.DoubleSide }));
+  lidUnder.rotation.x = Math.PI / 2;
+  lidUnder.position.y = lidY - LIDH;
+  can.add(lidUnder);
+  const bottom = new THREE.Mesh(new THREE.CircleGeometry(R, 64), new THREE.MeshBasicMaterial({ color: 0xcfcac0 }));
   bottom.rotation.x = Math.PI / 2; bottom.position.y = -BODY / 2;
   can.add(bottom);
 
@@ -220,7 +278,7 @@
   sg.fillStyle = grad; sg.fillRect(0, 0, 256, 256);
   const shadow = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 3.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = -BODY / 2 - 0.55;
+  shadow.position.y = -BODY / 2 - 0.5;
   tilt.add(shadow);
 
   // ---------- yapraklar ve altın tozu ----------
@@ -291,32 +349,31 @@
   let mouseX = 0, mouseY = 0, current = null, busy = Promise.resolve();
   let visibleW = 10, visibleH = 7;
 
-  function setLid(id) {
+  let spin = 0;
+
+  function assign(side, id, tex, top) {
     const d = LIDS[id] || LIDS.signature;
-    lidSide.color.set(d.lid);
-    const old = lidTopMat.map;
-    lidTopMat.map = lidTexture(id);
-    lidTopMat.needsUpdate = true;
-    if (old) old.dispose();
+    bodyMat.uniforms["t" + side].value = tex;
+    topMat.uniforms["t" + side].value = top;
+    rimMat.uniforms["t" + side].value = tex;
+    rimMat.uniforms["c" + side].value.set(d.rim);
+    rimMat.uniforms["p" + side].value = d.pattern ? 1 : 0;
   }
 
   function setDesign(id) {
     if (id === current) return busy;
     current = id;
-    busy = busy.then(() => bodyTexture(id)).then(tex => {
-      if (!tex || current !== id) return;
-      const u = bodyMat.uniforms;
-      if (u.tA.value === blank) { u.tA.value = tex; u.tB.value = tex; setLid(id); return; }
-      u.tB.value = tex;
+    busy = busy.then(() => Promise.all([bodyTexture(id), topTexture(id)])).then(([tex, top]) => {
+      if (!tex || !top || current !== id) return;
+      if (bodyMat.uniforms.tA.value === blank) { assign("A", id, tex, top); assign("B", id, tex, top); return; }
+      assign("B", id, tex, top);
       return new Promise(res => {
         const start = performance.now(), dur = reduce ? 1 : 1100;
-        let lidSet = false;
         (function step(now) {
           const k = Math.min(1, (now - start) / dur);
-          u.mixv.value = k;
-          if (!lidSet && k > 0.5) { setLid(id); lidSet = true; }
+          shared.mixv.value = k;
           if (k < 1) requestAnimationFrame(step);
-          else { u.tA.value = tex; u.mixv.value = 0; res(); }
+          else { assign("A", id, tex, top); shared.mixv.value = 0; res(); }
         })(start);
         spin += reduce ? 0 : 0.9;
       });
@@ -324,7 +381,6 @@
     return busy;
   }
 
-  let spin = 0;
 
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
@@ -343,10 +399,12 @@
   }, { passive: true });
 
   // sahne yerleşimleri, görünür genişliğe göre
+  const wide = () => camera.aspect >= 1.5;
   const POSES = {
-    hero:    () => small() ? { x: 0, y: -2.2, s: 0.55, ry: 0 } : { x: visibleW * 0.2, y: -0.15, s: 1, ry: -0.15 },
+    hero:    () => small() ? { x: 0, y: -1.95, s: 0.5, ry: 0 } : { x: visibleW * (wide() ? 0.2 : 0.25), y: -0.15, s: wide() ? 1 : 0.85, ry: -0.15 },
     moments: () => small() ? { x: 0, y: 0.45, s: 0.68, ry: 0 } : { x: visibleW * 0.17, y: -0.35, s: 0.98, ry: 0.1 },
-    contact: () => small() ? { x: 0, y: -9, s: 0.5, ry: 0 } : { x: -visibleW * 0.27, y: 0.05, s: 0.8, ry: 0.2 },
+    contact: () => small() ? { x: 0, y: -9, s: 0.5, ry: 0 } : { x: -visibleW * 0.27, y: 0.55, s: 0.8, ry: 0.2 },
+    outro:   () => small() ? { x: 0, y: 1.9, s: 0.4, ry: 0 } : { x: 0, y: 2.05, s: 0.42, ry: 0 },
     hidden:  () => ({ x: pose.x, y: -9, s: 0.6, ry: 0 })
   };
   let poseName = "hero";
@@ -395,7 +453,7 @@
   });
 
   // ön yükleme
-  setTimeout(() => Object.keys(LIDS).forEach(id => id !== "signature" && bodyTexture(id)), 1200);
+  setTimeout(() => Object.keys(LIDS).forEach(id => { bodyTexture(id); topTexture(id); }), 1200);
 
   window.SolingoStage = {
     setDesign,
