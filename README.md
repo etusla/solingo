@@ -3,10 +3,10 @@
 Solingo araç içi / bambu peçete koleksiyonu için tek sayfalık tanıtım sitesi. Derleme adımı yoktur; saf HTML, CSS ve JavaScript.
 
 - `public/index.html` — sayfa
-- `public/assets/style.css`, `public/assets/app.js` — stil ve etkileşim (koleksiyon filtresi, anlar, detay penceresi, seçki ve teklif formu)
-- `public/assets/img/` — ürün görselleri (WebP)
+- `public/assets/style.css`, `public/assets/app.js` — stil ve desen galerisi
+- `public/assets/img/` — ürün görselleri; `cut/` arka planı temizlenmiş kutular
 
-Tasarım, seri ve "an" verileri `public/assets/app.js` içindeki `DESIGNS`, `SERIES` ve `MOMENTS` dizilerindedir. Teklif formunun gideceği e-posta adresi aynı dosyanın başındaki `CONFIG.email` alanından ayarlanır.
+Desen listesi `public/assets/app.js` içindeki `DESIGNS` dizisindedir; kullanım sahneleri `public/index.html` içinde SVG olarak çizilidir.
 
 ## Cloudflare ile yayınlama
 
