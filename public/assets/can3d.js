@@ -397,12 +397,25 @@
   // sahne yerleşimleri, görünür genişliğe göre
   const wide = () => camera.aspect >= 1.5;
   const POSES = {
-    hero:    () => small() ? { x: 0, y: -2.3, s: 0.45, ry: 0 } : { x: visibleW * (wide() ? 0.2 : 0.25), y: -0.15, s: wide() ? 1 : 0.85, ry: -0.15 },
+    hero:    () => small() ? heroSlotPose() : { x: visibleW * (wide() ? 0.2 : 0.25), y: -0.15, s: wide() ? 1 : 0.85, ry: -0.15 },
     moments: () => small() ? { x: 0, y: 0.45, s: 0.68, ry: 0 } : { x: visibleW * 0.17, y: -0.35, s: 0.98, ry: 0.1 },
     contact: () => small() ? { x: 0, y: -9, s: 0.5, ry: 0 } : { x: -visibleW * 0.27, y: 0.55, s: 0.8, ry: 0.2 },
-    outro:   () => small() ? { x: 0, y: 1.55, s: 0.34, ry: 0 } : { x: 0, y: 1.8, s: 0.38, ry: 0 },
+    outro:   () => small() ? { x: 0, y: -9, s: 0.4, ry: 0 } : { x: 0, y: 1.8, s: 0.38, ry: 0 },
     hidden:  () => ({ x: pose.x, y: -9, s: 0.6, ry: 0 })
   };
+  // telefonda kutu, butonun altındaki boş alana sığdırılır (yazı ve butonla çakışmasın)
+  function heroSlotPose() {
+    const slot = document.getElementById("heroSlot");
+    const H = canvas.clientHeight || window.innerHeight;
+    if (!slot) return { x: 0, y: -2.3, s: 0.45, ry: 0 };
+    const r = slot.getBoundingClientRect();
+    const top = r.top + window.scrollY, bot = Math.min(r.bottom + window.scrollY, H);
+    const upp = visibleH / H;                      // piksel başına sahne birimi
+    const room = Math.max(120, bot - top) * upp;   // kullanılabilir yükseklik (birim)
+    const s = Math.max(0.3, Math.min(0.5, room * 0.74 / 4.9));
+    const cy = (top + Math.max(120, bot - top) / 2);
+    return { x: 0, y: (H / 2 - cy) * upp + 0.1 * s, s, ry: 0 };
+  }
   let poseName = "hero";
   function setPose(name) { poseName = name; Object.assign(target, POSES[name]()); }
   window.addEventListener("resize", () => setPose(poseName));
