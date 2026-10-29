@@ -167,13 +167,7 @@
     float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
       return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
     vec3 dissolve(vec3 a, vec3 b, vec2 q, float mixv){
-      float n = noise(q * vec2(14.0, 9.0)) * 0.6 + noise(q * vec2(40.0, 30.0)) * 0.4;
-      float edge = mixv * 1.25 - 0.12;
-      float m = smoothstep(edge - 0.06, edge + 0.02, 1.0 - n);
-      m = mixv >= 0.999 ? 1.0 : m;
-      vec3 col = mix(a, b, m);
-      float glow = (1.0 - smoothstep(0.0, 0.07, abs((1.0 - n) - edge))) * step(0.001, mixv) * step(mixv, 0.999);
-      return col + vec3(1.0, 0.82, 0.45) * glow * 1.4;
+      return mix(a, b, smoothstep(0.0, 1.0, mixv));
     }
     vec3 shade(vec3 col, vec3 N, vec3 V, vec3 L, float rimAmt){
       float dif = 0.86 + 0.22 * max(dot(N, L), 0.0);
@@ -349,7 +343,6 @@
   let mouseX = 0, mouseY = 0, current = null, busy = Promise.resolve();
   let visibleW = 10, visibleH = 7;
 
-  let spin = 0;
 
   function assign(side, id, tex, top) {
     const d = LIDS[id] || LIDS.signature;
@@ -368,22 +361,25 @@
       if (bodyMat.uniforms.tA.value === blank) { assign("A", id, tex, top); assign("B", id, tex, top); return; }
       assign("B", id, tex, top);
       return new Promise(res => {
-        const start = performance.now(), dur = reduce ? 1 : 1100;
+        const start = performance.now(), dur = reduce ? 1 : 420;
         (function step(now) {
           const k = Math.min(1, (now - start) / dur);
           shared.mixv.value = k;
           if (k < 1) requestAnimationFrame(step);
           else { assign("A", id, tex, top); shared.mixv.value = 0; res(); }
         })(start);
-        spin += reduce ? 0 : 0.9;
       });
     });
     return busy;
   }
 
 
+  let lastW = 0;
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
+    // telefonda adres çubuğu açılıp kapanınca yükseklik değişir; sahne yerinden oynamasın
+    if (small() && w === lastW) return;
+    lastW = w;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
@@ -401,10 +397,10 @@
   // sahne yerleşimleri, görünür genişliğe göre
   const wide = () => camera.aspect >= 1.5;
   const POSES = {
-    hero:    () => small() ? { x: 0, y: -1.95, s: 0.5, ry: 0 } : { x: visibleW * (wide() ? 0.2 : 0.25), y: -0.15, s: wide() ? 1 : 0.85, ry: -0.15 },
+    hero:    () => small() ? { x: 0, y: -2.3, s: 0.45, ry: 0 } : { x: visibleW * (wide() ? 0.2 : 0.25), y: -0.15, s: wide() ? 1 : 0.85, ry: -0.15 },
     moments: () => small() ? { x: 0, y: 0.45, s: 0.68, ry: 0 } : { x: visibleW * 0.17, y: -0.35, s: 0.98, ry: 0.1 },
     contact: () => small() ? { x: 0, y: -9, s: 0.5, ry: 0 } : { x: -visibleW * 0.27, y: 0.55, s: 0.8, ry: 0.2 },
-    outro:   () => small() ? { x: 0, y: 1.9, s: 0.4, ry: 0 } : { x: 0, y: 2.05, s: 0.42, ry: 0 },
+    outro:   () => small() ? { x: 0, y: 1.55, s: 0.34, ry: 0 } : { x: 0, y: 1.8, s: 0.38, ry: 0 },
     hidden:  () => ({ x: pose.x, y: -9, s: 0.6, ry: 0 })
   };
   let poseName = "hero";
@@ -416,20 +412,20 @@
   let rotY = 0;
   function frame() {
     const t = clock.getElapsedTime();
-    const k = 0.06;
+    const k = small() ? 0.14 : 0.1;
     pose.x += (target.x - pose.x) * k;
     pose.y += (target.y - pose.y) * k;
     pose.s += (target.s - pose.s) * k;
     pose.ry += (target.ry - pose.ry) * k;
-    spin *= 0.94;
-    const idle = reduce ? 0 : Math.sin(t * 0.5) * 0.32;
-    rotY += ((idle + pose.ry + mouseX * 0.5 + spin) - rotY) * 0.08;
-    tilt.position.set(pose.x, pose.y + (reduce ? 0 : Math.sin(t * 1.1) * 0.12), 0);
+    const calm = reduce || small();
+    const idle = reduce ? 0 : Math.sin(t * 0.5) * (small() ? 0.22 : 0.32);
+    rotY += ((idle + pose.ry + (calm ? 0 : mouseX * 0.5)) - rotY) * 0.08;
+    tilt.position.set(pose.x, pose.y + (calm ? 0 : Math.sin(t * 1.1) * 0.12), 0);
     tilt.scale.setScalar(pose.s);
     can.rotation.y = rotY;
-    tilt.rotation.x = 0.2 + mouseY * 0.12;
-    tilt.rotation.z = reduce ? 0 : Math.sin(t * 0.7) * 0.03;
-    shadow.material.opacity = 0.8 - Math.sin(t * 1.1) * 0.1;
+    tilt.rotation.x = 0.2 + (calm ? 0 : mouseY * 0.12);
+    tilt.rotation.z = calm ? 0 : Math.sin(t * 0.7) * 0.03;
+    shadow.material.opacity = calm ? 0.8 : 0.8 - Math.sin(t * 1.1) * 0.1;
     petals.uniforms.time.value = reduce ? 0 : t;
     dust.uniforms.time.value = reduce ? 0 : t;
     renderer.render(scene, camera);
@@ -453,7 +449,7 @@
   });
 
   // ön yükleme
-  setTimeout(() => Object.keys(LIDS).forEach(id => { bodyTexture(id); topTexture(id); }), 1200);
+  Object.keys(LIDS).forEach(id => { if (id !== "signature") { bodyTexture(id); topTexture(id); } });
 
   window.SolingoStage = {
     setDesign,

@@ -60,7 +60,7 @@
   words.innerHTML = MOMENTS.map((m, i) => `<p class="word${i === 0 ? " on" : ""}" data-i="${i}">${m.line} <em>yanında.</em></p>`).join("");
   ticks.innerHTML = MOMENTS.map((m, i) => `<li class="${i === 0 ? "on" : ""}">${m.name}</li>`).join("");
   words.querySelectorAll(".word").forEach(split);
-  words.querySelectorAll(".word").forEach(w => w.querySelectorAll(".ch").forEach((c, k) => c.style.setProperty("--d", `${k * 35}ms`)));
+  words.querySelectorAll(".word").forEach(w => w.querySelectorAll(".ch").forEach((c, k) => c.style.setProperty("--d", `${k * 14}ms`)));
 
   // ---------- galeri ----------
   const grid = document.getElementById("grid");
@@ -122,14 +122,15 @@
     const req = [...form.querySelectorAll("[required]")];
     const bad = req.filter(f => !f.value.trim());
     req.forEach(f => f.classList.toggle("invalid", bad.includes(f)));
-    if (bad.length) { err.textContent = "Lütfen adınızı ve mesajınızı yazın."; err.hidden = false; bad[0].focus(); return; }
+    if (bad.length) { err.textContent = "Lütfen adınızı, kurumunuzu ve mesajınızı yazın."; err.hidden = false; bad[0].focus(); return; }
     err.hidden = true;
     const v = Object.fromEntries(new FormData(form).entries());
     const text = [
-      "Merhaba, Solingo hakkında bilgi almak istiyorum.", "",
+      "Merhaba, Solingo için kurumsal bilgi almak istiyoruz.", "",
       `Ad Soyad: ${v.ad}`,
-      v.firma ? `Firma: ${v.firma}` : "",
+      `Kurum: ${v.firma}`,
       v.tel ? `Telefon: ${v.tel}` : "",
+      v.eposta ? `E-posta: ${v.eposta}` : "",
       "", v.mesaj
     ].filter((l, i, a) => l || (a[i - 1] && a[i - 1] !== "")).join("\n");
     if (via === "wa") {
@@ -180,6 +181,7 @@
     if (name === "hero") { heroCycle(); setBg(BASE_BG); }
     else clearInterval(heroTimer);
     if (name === "moments") { momentIdx = -1; }
+    if (name === "hidden") setBg(BASE_BG);
     if (name === "contact" || name === "outro") { stage() && stage().setDesign("signature"); setBg(BASE_BG); }
     document.body.dataset.region = name;
   }
@@ -207,9 +209,9 @@
   if (window.gsap && !reduce) {
     gsap.registerPlugin(ScrollTrigger);
     const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
-    intro.from(".hero h1 .ch", { yPercent: 110, opacity: 0, rotate: 8, duration: 0.9, stagger: 0.025 })
-      .from(".hero .anim", { y: 26, opacity: 0, duration: 0.8, stagger: 0.1 }, "-=0.5")
-      .from(".nav", { y: -30, opacity: 0, duration: 0.7 }, 0.2);
+    intro.from(".hero h1 .ch", { yPercent: 100, opacity: 0, duration: 0.55, stagger: 0.012 })
+      .from(".hero .anim", { y: 18, opacity: 0, duration: 0.5, stagger: 0.06 }, "-=0.35")
+      .from(".nav", { y: -20, opacity: 0, duration: 0.45 }, 0);
 
     document.querySelectorAll(".waves path").forEach((p, i) => {
       const len = p.getTotalLength();
@@ -217,21 +219,21 @@
     });
     gsap.to(".waves", { yPercent: 18, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-    document.querySelectorAll(".g-head .split, .contact .split, .outro .split").forEach(h => {
+    document.querySelectorAll(".corp .split, .g-head .split, .contact .split, .outro .split").forEach(h => {
       gsap.from(h.querySelectorAll(".ch"), {
-        yPercent: 110, opacity: 0, duration: 0.8, stagger: 0.02, ease: "power3.out",
-        scrollTrigger: { trigger: h, start: "top 85%" }
+        yPercent: 100, opacity: 0, duration: 0.5, stagger: 0.008, ease: "power3.out",
+        scrollTrigger: { trigger: h, start: "top 95%" }
       });
     });
-    gsap.utils.toArray(".card").forEach((c, i) => {
+    gsap.utils.toArray(".card, .values article, .steps li").forEach((c, i) => {
       gsap.from(c, {
-        y: 60, opacity: 0, rotateX: 18, duration: 0.9, ease: "power3.out", delay: (i % 4) * 0.08,
-        scrollTrigger: { trigger: c, start: "top 92%" }
+        y: 28, opacity: 0, duration: 0.5, ease: "power2.out", delay: (i % 4) * 0.04,
+        scrollTrigger: { trigger: c, start: "top 98%" }
       });
     });
     gsap.from(".form, .c-lead, .direct", {
-      y: 30, opacity: 0, duration: 0.8, stagger: 0.12, ease: "power3.out",
-      scrollTrigger: { trigger: ".contact", start: "top 70%" }
+      y: 20, opacity: 0, duration: 0.5, stagger: 0.06, ease: "power2.out",
+      scrollTrigger: { trigger: ".contact", start: "top 85%" }
     });
   }
 })();
