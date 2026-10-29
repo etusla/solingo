@@ -18,6 +18,16 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, small() ? 1.75 : 2));
   renderer.setClearColor(0x000000, 0);
 
+  // canvas yazıları doğru yazı tipiyle çizilsin diye önce fontları bekle
+  const fontsReady = document.fonts && document.fonts.load
+    ? Promise.all([
+        document.fonts.load('600 100px "Cormorant Garamond"'),
+        document.fonts.load('italic 800 100px "Exo 2"'),
+        document.fonts.load('700 30px "Manrope"')
+      ]).catch(() => {})
+    : Promise.resolve();
+
+
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
   camera.position.set(0, 1.1, 13);
@@ -131,7 +141,7 @@
     const key = id + ":top";
     if (texCache[key]) return texCache[key];
     const p = id === "signature"
-      ? Promise.resolve(signatureTop())
+      ? fontsReady.then(() => signatureTop())
       : new Promise(res => loader.load(`assets/tex/${id}-top.webp`, t => res(prep(t)), undefined, () => res(null)));
     texCache[key] = p;
     return p;
@@ -140,7 +150,7 @@
   function bodyTexture(id) {
     if (texCache[id]) return texCache[id];
     const p = id === "signature"
-      ? Promise.resolve(signatureTexture())
+      ? fontsReady.then(() => signatureTexture())
       : new Promise(res => loader.load(`assets/tex/${id}.webp`, t => res(prep(t)), undefined, () => res(null)));
     texCache[id] = p;
     return p;
@@ -380,7 +390,7 @@
     // telefonda adres çubuğu açılıp kapanınca yükseklik değişir; sahne yerinden oynamasın
     if (small() && w === lastW) return;
     lastW = w;
-    renderer.setSize(w, h, false);
+    renderer.setSize(w, h, true);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     visibleH = 2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
@@ -399,9 +409,9 @@
   const POSES = {
     hero:    () => small() ? heroSlotPose() : { x: visibleW * (wide() ? 0.2 : 0.25), y: -0.15, s: wide() ? 1 : 0.85, ry: -0.15 },
     moments: () => small() ? { x: 0, y: 0.45, s: 0.68, ry: 0 } : { x: visibleW * 0.17, y: -0.35, s: 0.98, ry: 0.1 },
-    contact: () => small() ? { x: 0, y: -9, s: 0.5, ry: 0 } : { x: -visibleW * 0.27, y: 0.55, s: 0.8, ry: 0.2 },
-    outro:   () => small() ? { x: 0, y: -9, s: 0.4, ry: 0 } : { x: 0, y: 1.8, s: 0.38, ry: 0 },
-    hidden:  () => ({ x: pose.x, y: -9, s: 0.6, ry: 0 })
+    contact: () => small() ? { x: pose.x, y: pose.y, s: 0, ry: pose.ry } : { x: -visibleW * 0.27, y: 0.55, s: 0.8, ry: 0.2 },
+    outro:   () => small() ? { x: pose.x, y: pose.y, s: 0, ry: pose.ry } : { x: 0, y: 1.8, s: 0.38, ry: 0 },
+    hidden:  () => ({ x: pose.x, y: pose.y, s: 0, ry: pose.ry })
   };
   // telefonda kutu, butonun altındaki boş alana sığdırılır (yazı ve butonla çakışmasın)
   function heroSlotPose() {
@@ -416,8 +426,17 @@
     const cy = (top + Math.max(120, bot - top) / 2);
     return { x: 0, y: (H / 2 - cy) * upp + 0.1 * s, s, ry: 0 };
   }
-  let poseName = "hero";
-  function setPose(name) { poseName = name; Object.assign(target, POSES[name]()); }
+  // uzak yerleşimler arasında kutu yazıların üzerinden kaymasın: küçülüp yeni yerinde büyür
+  let poseName = "hero", pending = null;
+  function setPose(name) {
+    poseName = name;
+    const t = POSES[name]();
+    const far = Math.hypot(t.x - pose.x, t.y - pose.y) > 2.5;
+    if (far && pose.s > 0.05 && t.s > 0) { pending = t; target.s = 0; return; }
+    pending = null;
+    if (pose.s < 0.05) { pose.x = t.x; pose.y = t.y; pose.ry = t.ry; }
+    Object.assign(target, t);
+  }
   window.addEventListener("resize", () => setPose(poseName));
 
   // ---------- döngü ----------
@@ -426,6 +445,10 @@
   function frame() {
     const t = clock.getElapsedTime();
     const k = small() ? 0.14 : 0.1;
+    if (pending && pose.s < 0.05) {
+      pose.x = pending.x; pose.y = pending.y; pose.ry = pending.ry;
+      Object.assign(target, pending); pending = null;
+    }
     pose.x += (target.x - pose.x) * k;
     pose.y += (target.y - pose.y) * k;
     pose.s += (target.s - pose.s) * k;
@@ -445,18 +468,10 @@
     requestAnimationFrame(frame);
   }
 
-  const fontsReady = document.fonts && document.fonts.load
-    ? Promise.all([
-        document.fonts.load('600 100px "Cormorant Garamond"'),
-        document.fonts.load('italic 800 100px "Exo 2"'),
-        document.fonts.load('700 30px "Manrope"')
-      ]).catch(() => {})
-    : Promise.resolve();
-
   fontsReady.then(() => {
     setPose(poseName);
     pose.x = target.x; pose.y = target.y - 3; pose.s = target.s;
-    setDesign("signature");
+    if (!current) setDesign("signature");
     requestAnimationFrame(frame);
     document.documentElement.classList.add("stage-ready");
   });
