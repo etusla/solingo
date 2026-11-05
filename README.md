@@ -20,7 +20,7 @@ npm run build    # dist/ klasörüne derler
 
 ## Yayın
 
-Cloudflare Workers, `main` dalına yapılan her gönderimde `wrangler.toml` içindeki derleme komutunu çalıştırır ve `dist/` klasörünü yayınlar.
+Cloudflare Workers Builds, `main` dalına yapılan her gönderimde `wrangler.toml` içindeki derleme komutunu çalıştırır ve `dist/` klasörünü yayınlar.
 
 ## Yapay zekâ desen taslağı
 
