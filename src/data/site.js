@@ -3,7 +3,7 @@
 export const SITE = {
   url: "https://solingo.com.tr",
   name: "Solingo",
-  title: "Solingo — Araç İçi Bambu Peçete | Markanıza Özel Üretim",
+  title: "Solingo — Araç İçi Bambu Peçete | İstediğiniz Dizaynda Üretim",
   description:
     "Solingo araç içi peçete: bardaklığa tam oturan silindir kutuda %100 bambu, 3 katlı, 50 yapraklı peçete. 21 desen, dilediğiniz renkte ve logonuzla siparişe özel üretim.",
   phone: "+90 532 701 21 00",
