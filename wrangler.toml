@@ -31,3 +31,7 @@ namespace_id = "2106"
 [[kv_namespaces]]
 binding = "LIMITS"
 id = "015d14506a754e16a42fe8c863647636"
+
+# Worker günlükleri (panelde Observability sekmesi)
+[observability]
+enabled = true

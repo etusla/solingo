@@ -35,6 +35,30 @@ async function verifyTurnstile(env, token, ip) {
   return d.success === true;
 }
 
+// Workers AI yanıtı modele göre farklı biçimlerde gelebilir: base64, data: adresi ya da görsel bağlantısı
+async function toDataUri(out) {
+  const v = out && (out.image ?? out.result?.image ?? out.images?.[0] ?? out.result?.images?.[0]);
+  if (typeof v === "string") {
+    if (v.startsWith("data:")) return v;
+    if (/^https?:\/\//.test(v)) {
+      const r = await fetch(v);
+      if (!r.ok) return null;
+      const buf = new Uint8Array(await r.arrayBuffer());
+      let bin = "";
+      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      return `data:${r.headers.get("Content-Type") || "image/jpeg"};base64,${btoa(bin)}`;
+    }
+    return `data:image/jpeg;base64,${v}`;
+  }
+  if (out instanceof ReadableStream || out instanceof ArrayBuffer || out instanceof Uint8Array) {
+    const buf = new Uint8Array(out instanceof ReadableStream ? await new Response(out).arrayBuffer() : out);
+    let bin = "";
+    for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+    return `data:image/png;base64,${btoa(bin)}`;
+  }
+  return null;
+}
+
 export async function handleDesen(request, env) {
   if (request.method !== "POST") return json({ error: "Yalnızca POST isteği kabul edilir." }, 405);
 
@@ -64,13 +88,18 @@ export async function handleDesen(request, env) {
   try {
     result = await env.AI.run(MODEL, { prompt: buildPrompt(prompt, colors), steps: 6, seed: Math.floor(Math.random() * 1e9) });
   } catch (e) {
-    return json({ error: "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin." }, 502);
+    console.error("desen: AI.run hatası", e && (e.stack || e.message || e));
+    return json({ error: "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.", code: "ai_run" }, 502);
   }
-  if (!result || !result.image) return json({ error: "Desen oluşturulamadı. Tarifi değiştirip tekrar deneyin." }, 502);
+  const image = await toDataUri(result).catch(e => { console.error("desen: dönüştürme hatası", e); return null; });
+  if (!image) {
+    console.error("desen: beklenmeyen yanıt", typeof result, result && Object.keys(result));
+    return json({ error: "Desen oluşturulamadı. Tarifi değiştirip tekrar deneyin.", code: "ai_output" }, 502);
+  }
 
   if (env.LIMITS) await env.LIMITS.put(key, String(used + 1), { expirationTtl: 60 * 60 * 26 });
 
-  return json({ image: `data:image/jpeg;base64,${result.image}`, remaining: DAILY_LIMIT - used - 1 });
+  return json({ image, remaining: DAILY_LIMIT - used - 1 });
 }
 
 export default {

@@ -134,6 +134,7 @@ aiGo.addEventListener("click", async () => {
   if (prompt.length < 3) { aiNote.textContent = "Lütfen istediğiniz deseni birkaç kelimeyle anlatın."; aiIn.focus(); return; }
   const token = window.turnstile && document.querySelector(".cf-turnstile") ? window.turnstile.getResponse() : "";
   aiGo.disabled = true; aiGo.textContent = "Hazırlanıyor…";
+  aiNote.classList.remove("err");
   aiNote.textContent = "Desen hazırlanıyor, bu birkaç saniye sürebilir.";
   $("#can").classList.add("busy");
   try {
@@ -142,12 +143,15 @@ aiGo.addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt, token, colors: `${st.body[0]} ve ${st.ink[0]}` })
     });
+    const type = r.headers.get("Content-Type") || "";
+    if (!type.includes("json")) throw new Error(`Sunucuya ulaşılamadı (${r.status}). Sayfayı yenileyip tekrar deneyin.`);
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.image) throw new Error(d.error || "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.");
+    if (!r.ok || !d.image) throw new Error((d.error || "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.") + (d.code ? ` [${d.code}]` : ` [${r.status}]`));
     useDesign(d.image, "Yapay zekâ taslağı", prompt);
     aiNote.textContent = `Taslak kutuya uygulandı. Kalan deneme: ${d.remaining}. Baskı tasarımı ekibimizce hazırlanır.`;
   } catch (err) {
     aiNote.textContent = err.message || AI_NOTE;
+    aiNote.classList.add("err");
   } finally {
     aiGo.disabled = false; aiGo.textContent = "Oluştur";
     $("#can").classList.remove("busy");

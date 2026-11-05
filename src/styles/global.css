@@ -150,6 +150,7 @@ h1 em,h2 em{font-style:italic;color:var(--gold-ink)}
 .ai-ideas button{padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:none;color:#e8e4d8;font-size:.8rem}
 .ai-ideas button:hover{border-color:var(--gold);color:var(--gold)}
 .ai .hint{margin:10px 0 0}
+.ai .hint.err{color:#ffb3a8;font-weight:600}
 .cf-turnstile{margin-top:10px}
 #can.busy{animation:busy 1.2s ease-in-out infinite}
 @keyframes busy{50%{opacity:.55}}
