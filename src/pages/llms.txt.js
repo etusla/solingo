@@ -1,4 +1,4 @@
-import { SITE, COMPANY, DESIGNS, GROUPS, SIZES, FAQ, sizeLabel } from "../data/site.js";
+import { SITE, COMPANY, DESIGNS, GROUPS, SIZES, SERIES, FAQ, sizeLabel } from "../data/site.js";
 
 // Yapay zekâ arama motorları için sitenin düz metin özeti (llms.txt)
 export function GET() {
@@ -19,6 +19,10 @@ Solingo, ${COMPANY.legalName} markasıdır.
 
 ## Koleksiyon (${DESIGNS.length} desen)
 ${groups}
+
+## Tasarım örnekleri
+- Solingo Renk Serisi: sarı, mavi, turuncu ve yeşil tonlarında geometrik desenli dört kutu.
+${SERIES.map(d => `- ${d.name} (${d.tag}, ${sizeLabel(SIZES[d.s])})`).join("\n")}
 
 ## Siparişe özel üretim
 - Seçenekler: kutu rengi, baskı rengi (altın, gümüş, beyaz, siyah), logo ve yazı, desen, kapak etiketi, kutu boyu, kat ve yaprak sayısı, paketleme.

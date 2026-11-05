@@ -90,6 +90,21 @@ export const FAQ = [
    "Güneş ışığından uzakta, serin ve kuru bir yerde muhafaza edin."]
 ];
 
+// Tasarım örnekleri: farklı tarz ve kutu boylarında üretilebilecek kutulardan seçki (s = SIZES sırası)
+export const SERIES = [
+  { id: "egrelti",         name: "Yaldızlı Eğrelti",  tag: "Yaldız",       s: 0 },
+  { id: "okaliptus",       name: "Zümrüt Okaliptüs",  tag: "Yaldız",       s: 0 },
+  { id: "gece-bordo",      name: "Gece Bordo",        tag: "Yaldız",       s: 0 },
+  { id: "sakayik",         name: "Şakayık",           tag: "Suluboya",     s: 1 },
+  { id: "narenciye",       name: "Narenciye",         tag: "Suluboya",     s: 1 },
+  { id: "modern-geometri", name: "Modern Geometri",   tag: "Geometrik",    s: 2 },
+  { id: "orman",           name: "Orman Dostları",    tag: "İllüstrasyon", s: 3 },
+  { id: "deniz",           name: "Deniz Dostları",    tag: "İllüstrasyon", s: 3 }
+];
+export const RENK_SERISI = [["Sarı", "#f2c522"], ["Mavi", "#2346c8"], ["Turuncu", "#e0602c"], ["Yeşil", "#3a8a4f"]];
+export const seri = id => `/img/seri/${id}.webp`;
+export const seriSm = id => `/img/seri/${id}-sm.webp`;
+
 export const img = id => `/img/g/${id}.webp`;
 export const imgMd = id => `/img/g/${id}-md.webp`;
 export const imgSm = id => `/img/g/${id}-sm.webp`;

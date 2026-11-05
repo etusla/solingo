@@ -1,4 +1,4 @@
-import { SITE, DESIGNS, STYLES, BODY, INK, SIZES, DEFAULT_SIZE, QUANTITIES, img, sizeLabel } from "../data/site.js";
+import { SITE, DESIGNS, STYLES, BODY, INK, SIZES, DEFAULT_SIZE, QUANTITIES, SERIES, img, seri, sizeLabel } from "../data/site.js";
 
 const $ = s => document.querySelector(s);
 
@@ -33,21 +33,44 @@ filters.addEventListener("click", e => {
   fitCta();
 });
 
-// ---------- büyük görsel ----------
-const lb = $("#lb"), lbImg = $("#lbImg"), lbName = $("#lbName");
-let cur = 0;
+// ---------- büyük görsel (koleksiyon ve tasarım örnekleri) ----------
+const lb = $("#lb"), lbImg = $("#lbImg"), lbName = $("#lbName"), lbAsk = $("#lbAsk");
+const SETS = {
+  desen: {
+    src: i => img(DESIGNS[i].id), name: i => DESIGNS[i].name, alt: i => `Solingo ${DESIGNS[i].name}`,
+    order: () => visible, ask: "Bu desen için teklif",
+    text: i => `${DESIGNS[i].name} deseni için teklif almak istiyoruz.\nTahmini adet: `
+  },
+  seri: {
+    src: i => seri(SERIES[i].id), name: i => SERIES[i].name, alt: i => `${SERIES[i].name} tasarım örneği`,
+    order: () => SERIES.map((_, k) => k), ask: "Benzeri için teklif", tall: true,
+    text: i => `${SERIES[i].name} tasarım örneğine benzer bir kutu için teklif almak istiyoruz (${sizeLabel(SIZES[SERIES[i].s])}).\nTahmini adet: `
+  }
+};
+let set = SETS.desen, cur = 0;
 function show(i) {
-  cur = i; const d = DESIGNS[i];
-  lbImg.src = img(d.id); lbImg.alt = `Solingo ${d.name}`; lbName.textContent = d.name;
+  cur = i;
+  lbImg.src = set.src(i); lbImg.alt = set.alt(i); lbName.textContent = set.name(i);
+}
+function openLb(name, i) {
+  set = SETS[name];
+  lb.classList.toggle("tall", !!set.tall);
+  lbImg.width = set.tall ? 720 : 1600; lbImg.height = set.tall ? 1000 : 1600;
+  lbAsk.textContent = set.ask;
+  show(i);
+  if (typeof lb.showModal === "function") lb.showModal(); else lb.setAttribute("open", "");
 }
 function step(dir) {
-  const k = visible.indexOf(cur);
-  show(visible[(k + dir + visible.length) % visible.length]);
+  const o = set.order(), k = o.indexOf(cur);
+  show(o[(k + dir + o.length) % o.length]);
 }
 grid.addEventListener("click", e => {
   const c = e.target.closest(".card[data-i]"); if (!c || !e.target.closest("button")) return;
-  show(+c.dataset.i);
-  if (typeof lb.showModal === "function") lb.showModal(); else lb.setAttribute("open", "");
+  openLb("desen", +c.dataset.i);
+});
+$("#arches").addEventListener("click", e => {
+  const c = e.target.closest(".arch[data-i]"); if (!c || !e.target.closest("button")) return;
+  openLb("seri", +c.dataset.i);
 });
 lb.addEventListener("click", e => {
   if (e.target === lb || e.target.closest("[data-close]")) lb.close();
@@ -57,10 +80,14 @@ lb.addEventListener("keydown", e => {
   if (e.key === "ArrowLeft") step(-1);
   if (e.key === "ArrowRight") step(1);
 });
-$("#lbAsk").addEventListener("click", e => {
+lbAsk.addEventListener("click", e => {
   e.preventDefault();
   lb.close();
-  prefill(`${DESIGNS[cur].name} deseni için teklif almak istiyoruz.\nTahmini adet: `);
+  prefill(set.text(cur));
+});
+$("#seriAsk").addEventListener("click", e => {
+  e.preventDefault();
+  prefill("Solingo Renk Serisi (sarı, mavi, turuncu, yeşil) için teklif almak istiyoruz.\nTahmini adet: ");
 });
 
 // ---------- özel üretim stüdyosu ----------
