@@ -1,4 +1,4 @@
-import { SITE, DESIGNS, STYLES, BODY, INK, SIZES, DEFAULT_SIZE, img, sizeLabel } from "../data/site.js";
+import { SITE, DESIGNS, STYLES, BODY, INK, SIZES, DEFAULT_SIZE, QUANTITIES, img, sizeLabel } from "../data/site.js";
 
 const $ = s => document.querySelector(s);
 
@@ -64,31 +64,54 @@ $("#lbAsk").addEventListener("click", e => {
 });
 
 // ---------- özel üretim stüdyosu ----------
-const st = { body: BODY[0], ink: INK[0], style: STYLES[0], design: null, logo: null, size: SIZES[DEFAULT_SIZE] };
+const st = {
+  body: BODY[0], ink: INK[0], style: STYLES[0], custom: null, logo: null, size: SIZES[DEFAULT_SIZE],
+  kat: "3", yaprak: "50", adet: QUANTITIES[0], paket: "Tekli kutu"
+};
+const mine = [];               // yapay zekâ ve yüklenen desenler: { url, label, ai }
+const small = () => window.innerWidth < 1000;
 
-function swatches(el, list, key) {
+// adımlar
+const tabs = [...document.querySelectorAll(".wiz-nav [data-go]")];
+const panes = [...document.querySelectorAll(".wizard .pane")];
+const prevB = $("#wizPrev"), nextB = $("#wizNext");
+let wizStep = 0;
+function go(n, focus) {
+  wizStep = Math.max(0, Math.min(panes.length - 1, n));
+  panes.forEach((p, k) => { p.hidden = k !== wizStep; });
+  tabs.forEach((t, k) => { t.setAttribute("aria-selected", String(k === wizStep)); t.classList.toggle("done", k < wizStep); });
+  prevB.hidden = wizStep === 0;
+  nextB.hidden = wizStep === panes.length - 1;
+  if (wizStep === panes.length - 1) summary();
+  if (focus) {
+    const w = $("#wizard").getBoundingClientRect();
+    if (w.top < 70 || w.top > window.innerHeight * 0.6) $("#wizard").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+tabs.forEach(t => t.addEventListener("click", () => go(+t.dataset.go, true)));
+prevB.addEventListener("click", () => go(wizStep - 1, true));
+nextB.addEventListener("click", () => go(wizStep + 1, true));
+
+// renk seçimleri
+function swatches(el, list, key, nameEl) {
   el.addEventListener("click", e => {
     const b = e.target.closest("[data-i]"); if (!b) return;
     st[key] = list[+b.dataset.i];
     el.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-    el.querySelector(".sw-name").textContent = st[key][0];
+    $(nameEl).textContent = st[key][0];
     paint();
   });
 }
-swatches($("#bodySw"), BODY, "body");
-swatches($("#inkSw"), INK, "ink");
+swatches($("#bodySw"), BODY, "body", "#bodyName");
+swatches($("#inkSw"), INK, "ink", "#inkName");
 
-const styleSw = $("#styleSw");
-function pickStyle(i, label) {
-  st.style = i === "upload" ? ["upload", label || st.designLabel || "Kendi deseniniz"] : STYLES[i];
-  styleSw.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === String(i))));
-  $("#styleName").textContent = st.style[1];
+// tek seçimli düğme grupları
+document.querySelectorAll(".seg[data-key]").forEach(g => g.addEventListener("click", e => {
+  const b = e.target.closest("[data-v]"); if (!b) return;
+  st[g.dataset.key] = b.dataset.v;
+  g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   paint();
-}
-styleSw.addEventListener("click", e => {
-  const b = e.target.closest("[data-s]"); if (!b) return;
-  pickStyle(b.dataset.s === "upload" ? "upload" : +b.dataset.s);
-});
+}));
 
 const sizes = $("#sizes");
 sizes.addEventListener("click", e => {
@@ -97,9 +120,39 @@ sizes.addEventListener("click", e => {
   sizes.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   paint();
 });
-["#s-kat", "#s-yaprak"].forEach(s => $(s).addEventListener("change", () => paint()));
 
-const note = $("#upNote"), NOTE = note.textContent;
+// desen seçimi: düz renk, koleksiyon ya da "Tasarımlarınız"
+const pane0 = $("#pane-0"), styleSw = $("#styleSw"), mineEl = $("#mine");
+function markSelection() {
+  pane0.querySelectorAll("[data-s]").forEach(b => b.setAttribute("aria-pressed", String(!st.custom && STYLES[+b.dataset.s] === st.style)));
+  mineEl.querySelectorAll("[data-m]").forEach(b => b.setAttribute("aria-pressed", String(st.custom === mine[+b.dataset.m])));
+}
+function pickStyle(i) { st.style = STYLES[i]; st.custom = null; markSelection(); paint(); }
+function pickMine(k) { st.custom = mine[k]; markSelection(); paint(); }
+pane0.addEventListener("click", e => {
+  const s = e.target.closest("[data-s]"); if (s) { pickStyle(+s.dataset.s); return; }
+  const m = e.target.closest("[data-m]"); if (m) pickMine(+m.dataset.m);
+});
+const altCol = $("#altCollection");
+altCol.addEventListener("click", () => {
+  const open = styleSw.hidden;
+  styleSw.hidden = !open;
+  altCol.setAttribute("aria-expanded", String(open));
+});
+
+function addMine(url, label, ai) {
+  const item = { url, label, ai: ai || null };
+  mine.unshift(item);
+  if (mine.length > 6) mine.pop();
+  mineEl.innerHTML = mine.map((m, k) => `<button type="button" data-m="${k}" title="${esc(m.label)}" aria-label="${esc(m.label)}" style="background-image:url(${m.url})"></button>`).join("");
+  $("#mineWrap").hidden = false;
+  st.custom = item;
+  markSelection();
+  paint();
+  if (small()) $(".preview").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+const note = $("#upNote");
 function readImage(input, done) {
   const f = input.files && input.files[0];
   input.value = "";
@@ -107,58 +160,59 @@ function readImage(input, done) {
   if (!/^image\//.test(f.type)) { note.textContent = "Lütfen PNG, JPG, WEBP ya da SVG biçiminde bir görsel seçin."; return; }
   if (f.size > 10 * 1024 * 1024) { note.textContent = "Görsel 10 MB'tan küçük olmalı."; return; }
   const r = new FileReader();
-  r.onload = () => { note.textContent = NOTE; done(r.result); };
+  r.onload = () => { note.textContent = ""; done(r.result); };
   r.onerror = () => { note.textContent = "Görsel okunamadı, başka bir dosya deneyin."; };
   r.readAsDataURL(f);
 }
-function useDesign(url, label, ai) {
-  st.design = url; st.designLabel = label; st.ai = ai || null;
-  let b = styleSw.querySelector('[data-s="upload"]');
-  if (!b) {
-    b = document.createElement("button");
-    b.type = "button"; b.dataset.s = "upload";
-    styleSw.insertBefore(b, $("#styleName"));
-  }
-  b.title = label; b.setAttribute("aria-label", label);
-  b.style.backgroundImage = `url(${url})`;
-  pickStyle("upload", label);
-}
-$("#upDesign").addEventListener("change", e => readImage(e.target, url => useDesign(url, "Kendi deseniniz")));
+$("#upDesign").addEventListener("change", e => readImage(e.target, url => addMine(url, "Yüklediğiniz görsel")));
+$("#upLogo").addEventListener("change", e => readImage(e.target, url => {
+  st.logo = url;
+  $("#logoLabel").textContent = "Logoyu değiştirin";
+  $("#logoClear").hidden = false;
+  paint();
+}));
+$("#logoClear").addEventListener("click", () => {
+  st.logo = null;
+  $("#logoLabel").textContent = "Logonuzu yükleyin";
+  $("#logoClear").hidden = true;
+  paint();
+});
 
 // ---------- yapay zekâ desen taslağı ----------
 const aiIn = $("#aiPrompt"), aiGo = $("#aiGo"), aiNote = $("#aiNote"), AI_NOTE = aiNote.textContent;
+const aiLabel = aiGo.innerHTML;
 $("#aiIdeas").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { aiIn.value = b.textContent; aiIn.focus(); } });
-aiIn.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); aiGo.click(); } });
+aiIn.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); aiGo.click(); } });
 aiGo.addEventListener("click", async () => {
   const prompt = aiIn.value.trim();
-  if (prompt.length < 3) { aiNote.textContent = "Lütfen istediğiniz deseni birkaç kelimeyle anlatın."; aiIn.focus(); return; }
-  const token = window.turnstile && document.querySelector(".cf-turnstile") ? window.turnstile.getResponse() : "";
-  aiGo.disabled = true; aiGo.textContent = "Hazırlanıyor…";
   aiNote.classList.remove("err");
-  aiNote.textContent = "Desen hazırlanıyor, bu birkaç saniye sürebilir.";
-  $("#can").classList.add("busy");
+  if (prompt.length < 3) { aiNote.textContent = "Lütfen istediğiniz deseni birkaç kelimeyle anlatın."; aiNote.classList.add("err"); aiIn.focus(); return; }
+  const hasTs = window.turnstile && document.querySelector(".cf-turnstile");
+  aiGo.disabled = true; aiGo.textContent = "Hazırlanıyor…";
+  aiNote.textContent = "Desen hazırlanıyor, bu 5–15 saniye sürebilir.";
+  $(".preview").classList.add("busy");
   try {
     const r = await fetch("/api/desen", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, token, colors: `${st.body[0]} ve ${st.ink[0]}` })
+      body: JSON.stringify({ prompt, token: hasTs ? window.turnstile.getResponse() : "", colors: `${st.body[0]} ve ${st.ink[0]}` })
     });
     const type = r.headers.get("Content-Type") || "";
     if (!type.includes("json")) throw new Error(`Sunucuya ulaşılamadı (${r.status}). Sayfayı yenileyip tekrar deneyin.`);
     const d = await r.json().catch(() => ({}));
     if (!r.ok || !d.image) throw new Error((d.error || "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.") + (d.code ? ` [${d.code}]` : ` [${r.status}]`));
-    useDesign(d.image, "Yapay zekâ taslağı", prompt);
-    aiNote.textContent = `Taslak kutuya uygulandı. Kalan deneme: ${d.remaining}. Baskı tasarımı ekibimizce hazırlanır.`;
+    addMine(d.image, `Yapay zekâ: ${prompt}`, prompt);
+    $("#aiLeft").textContent = `Bugün kalan: ${d.remaining}`;
+    aiNote.textContent = "Taslak kutuya uygulandı. Beğenmezseniz tarifi değiştirip yeniden oluşturun.";
   } catch (err) {
     aiNote.textContent = err.message || AI_NOTE;
     aiNote.classList.add("err");
   } finally {
-    aiGo.disabled = false; aiGo.textContent = "Oluştur";
-    $("#can").classList.remove("busy");
-    if (window.turnstile && document.querySelector(".cf-turnstile")) window.turnstile.reset();
+    aiGo.disabled = false; aiGo.innerHTML = aiLabel;
+    $(".preview").classList.remove("busy");
+    if (hasTs) window.turnstile.reset();
   }
 });
-$("#upLogo").addEventListener("change", e => readImage(e.target, url => { st.logo = url; paint(); }));
 
 const shade = (hex, k) => {
   const n = parseInt(hex.slice(1), 16);
@@ -167,6 +221,7 @@ const shade = (hex, k) => {
 };
 const textIn = $("#s-text");
 const attr = (sel, k, v) => $(sel).setAttribute(k, v);
+const styleName = () => st.custom ? (st.custom.ai ? "Yapay zekâ taslağı" : "Yüklediğiniz görsel") : st.style[1];
 
 function paint() {
   const b = st.body[1], ink = st.ink[1];
@@ -183,39 +238,48 @@ function paint() {
   attr("#cText", "font-size", String(Math.min(46, Math.round(300 / Math.max(len, 1)))));
   attr("#cLidText", "font-size", String(Math.min(13, Math.round(86 / Math.max(len, 1)))));
 
-  const kat = $("#s-kat").value, yap = $("#s-yaprak").value;
-  $("#cKat").textContent = `${kat} KATLI`;
-  $("#cYaprak").textContent = yap;
-  $("#dims").textContent = `${sizeLabel(st.size)} · ${kat} katlı · ${yap} yaprak`;
+  $("#cKat").textContent = `${st.kat} KATLI`;
+  $("#cYaprak").textContent = st.yaprak;
+  $("#dims").textContent = `${sizeLabel(st.size)} · ${st.kat} katlı · ${st.yaprak} yaprak`;
+  $("#pvStyle").textContent = styleName();
 
   // hazır desenlerin üzerinde logo zaten basılıdır
-  const sid = st.style[0];
-  const src = sid === "duz" ? "" : sid === "upload" ? st.design : `/img/stil/${sid}.webp`;
-  attr("#cPat", "href", src || "");
+  const plain = !st.custom && st.style[0] === "duz";
+  const ready = !st.custom && !plain;
+  const src = st.custom ? st.custom.url : plain ? "" : `/img/stil/${st.style[0]}.webp`;
+  attr("#cPat", "href", src);
   attr("#cPat", "visibility", src ? "visible" : "hidden");
-  attr("#cPat", "preserveAspectRatio", sid === "upload" ? "xMidYMid slice" : "none");
-  const ready = sid !== "duz" && sid !== "upload";
-  attr("#cWaves", "visibility", sid === "duz" ? "visible" : "hidden");
-  attr("#cIcons", "visibility", sid === "duz" ? "visible" : "hidden");
+  attr("#cPat", "preserveAspectRatio", st.custom ? "xMidYMid slice" : "none");
+  attr("#cWaves", "visibility", plain ? "visible" : "hidden");
+  attr("#cIcons", "visibility", plain ? "visible" : "hidden");
   attr("#cLogo", "href", st.logo || "");
   attr("#cLogo", "visibility", st.logo ? "visible" : "hidden");
   attr("#cText", "visibility", ready || st.logo ? "hidden" : "visible");
+  if (wizStep === panes.length - 1) summary();
 }
 textIn.addEventListener("input", paint);
+
+function choices() {
+  return [
+    ["Desen", st.custom ? (st.custom.ai ? `Yapay zekâ taslağı — “${st.custom.ai}”` : "Kendi görselimiz (dosyayı ayrıca ileteceğiz)") : st.style[1]],
+    [st.style[0] === "duz" && !st.custom ? "Kutu rengi" : "Kapak rengi", st.body[0]],
+    ["Baskı rengi", st.ink[0]],
+    ["Kutu boyu", sizeLabel(st.size)],
+    ["Peçete", `${st.kat} katlı, ${st.yaprak} yaprak`],
+    [st.logo ? "Logo" : "Kutu yazısı", st.logo ? "Kendi logomuz (dosyayı ayrıca ileteceğiz)" : (textIn.value.trim() || "Solingo")],
+    ["Tahmini adet", st.adet],
+    ["Paketleme", st.paket]
+  ];
+}
+const esc = v => String(v).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function summary() {
+  $("#summary").innerHTML = choices().map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
+}
 paint();
+go(0);
 
 $("#useDesign").addEventListener("click", () => {
-  prefill([
-    "Özel üretim için teklif almak istiyoruz.",
-    `Stil: ${st.style[0] !== "upload" ? st.style[1] : st.ai ? `Yapay zekâ taslağı — “${st.ai}”` : "Kendi desenimiz (dosyayı ayrıca ileteceğiz)"}`,
-    `${st.style[0] === "duz" ? "Kutu rengi" : "Kapak rengi"}: ${st.body[0]}`,
-    `Baskı rengi: ${st.ink[0]}`,
-    `Kutu boyu: ${sizeLabel(st.size)}`,
-    `Peçete: ${$("#s-kat").value} katlı, ${$("#s-yaprak").value} yaprak`,
-    st.logo ? "Logo: Kendi logomuz (dosyayı ayrıca ileteceğiz)" : `Kutu üzerindeki yazı: ${textIn.value.trim() || "Solingo"}`,
-    `Tahmini adet: ${$("#s-adet").value}`,
-    `Paketleme: ${$("#s-paket").value}`
-  ].join("\n"));
+  prefill(["Özel üretim için teklif almak istiyoruz.", ...choices().map(([k, v]) => `${k}: ${v}`)].join("\n"));
 });
 
 function prefill(text) {

@@ -214,7 +214,7 @@ const jsonld = [
         <div class="sec-head">
           <p class="kicker rv">Siparişe özel üretim</p>
           <h2 id="ozel-title" class="rv">Renginizi seçin,<br><em>kutunuzu biz üretelim.</em></h2>
-          <p class="sec-lead rv">Koleksiyondaki desenlerin yanı sıra kutu rengini, baskı rengini, kutu boyunu ve üzerindeki yazıyı kurumsal kimliğinize göre belirleyebilirsiniz. Aşağıda deneyin; seçiminiz teklif formuna aktarılır.</p>
+          <p class="sec-lead rv">Deseninizi yapay zekâyla tasarlayın, koleksiyondan seçin ya da kendi görselinizi yükleyin. Ölçüyü, renkleri ve logonuzu belirleyin; seçiminiz teklif formuna aktarılır.</p>
         </div>
 
         <div class="studio rv">
@@ -256,51 +256,69 @@ const jsonld = [
               <ellipse id="cLabel" cx="120" cy="58" rx="52" ry="10.5" fill="none" stroke="#d2bc86" stroke-width="1.2"/>
               <text id="cLidText" x="120" y="62" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-weight="600" font-size="13" fill="#d2bc86">Solingo</text>
             </svg>
-            <p class="dims" id="dims" aria-live="polite">{sizeLabel(SIZES[DEFAULT_SIZE])} · 3 katlı · 50 yaprak</p>
+            <div class="pv-meta">
+              <p class="pv-style" id="pvStyle">Düz renk</p>
+              <p class="dims" id="dims" aria-live="polite">{sizeLabel(SIZES[DEFAULT_SIZE])} · 3 katlı · 50 yaprak</p>
+            </div>
           </div>
 
-          <form class="options" id="studio" onsubmit="return false">
-            <fieldset>
-              <legend>Stil</legend>
-              <div class="styles" id="styleSw">
-                {STYLES.map(([id, n], i) => id === "duz"
-                  ? <button type="button" class="plain" data-s={i} aria-pressed="true" title={n}><span>Düz</span></button>
-                  : <button type="button" data-s={i} aria-pressed="false" title={n} aria-label={n} style={`background-image:url(/img/stil/${id}.webp)`}></button>)}
-                <span class="sw-name" id="styleName">Düz renk</span>
-              </div>
-              <div class="uploads">
-                <label class="up" for="upDesign"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Kendi deseninizi yükleyin</label>
-                <input type="file" id="upDesign" accept="image/png,image/jpeg,image/webp" hidden>
-                <label class="up" for="upLogo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Logonuzu yükleyin</label>
-                <input type="file" id="upLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
-              </div>
-              <p class="hint up-note" id="upNote" aria-live="polite">Yüklediğiniz görsel yalnızca bu önizlemede kullanılır; baskı dosyasını teklif sonrası bizimle paylaşırsınız.</p>
-            </fieldset>
-            <fieldset class="ai">
-              <legend>Yapay zekâ ile desen taslağı <span class="beta">Yeni</span></legend>
-              <div class="ai-row">
+          <div class="wizard" id="wizard">
+            <div class="wiz-nav" role="tablist" aria-label="Özel üretim adımları">
+              {["Desen", "Ölçü", "Renk", "Teklif"].map((t, i) => (
+                <button type="button" role="tab" id={`tab-${i}`} aria-controls={`pane-${i}`} data-go={i} aria-selected={String(i === 0)}><span>{i + 1}</span>{t}</button>
+              ))}
+            </div>
+
+            <div class="pane" id="pane-0" role="tabpanel" aria-labelledby="tab-0">
+              <div class="ai-hero">
+                <p class="ai-kicker"><span class="spark" aria-hidden="true">✦</span> Yapay zekâ ile tasarlayın</p>
+                <h3>Deseninizi kelimelerle anlatın</h3>
                 <label for="aiPrompt" class="sr-only">Desen tarifi</label>
-                <input id="aiPrompt" maxlength="240" autocomplete="off" placeholder="Örn. lacivert zemin üzerine altın yapraklar">
-                <button type="button" class="btn btn-gold btn-sm" id="aiGo">Oluştur</button>
+                <textarea id="aiPrompt" rows="2" maxlength="240" placeholder="Örn. lacivert zemin üzerine ince altın yapraklar"></textarea>
+                <div class="ai-ideas" id="aiIdeas">
+                  <button type="button">Altın dalgalı lacivert</button>
+                  <button type="button">Pastel çiçek bahçesi</button>
+                  <button type="button">Minimal geometrik, gri tonlar</button>
+                  <button type="button">Akdeniz çinileri</button>
+                </div>
+                {TURNSTILE_SITE_KEY && <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark"></div>}
+                <div class="ai-actions">
+                  <button type="button" class="btn btn-gold" id="aiGo"><span aria-hidden="true">✦</span> Desen oluştur</button>
+                  <span class="ai-left" id="aiLeft">Günde 8 deneme</span>
+                </div>
+                <p class="note" id="aiNote" aria-live="polite">Taslaktır; baskı tasarımı ekibimizce hazırlanır.</p>
               </div>
-              <div class="ai-ideas" id="aiIdeas">
-                <button type="button">Altın dalgalı lacivert</button>
-                <button type="button">Pastel çiçek bahçesi</button>
-                <button type="button">Minimal geometrik, gri tonlar</button>
+
+              <div class="mine" id="mineWrap" hidden>
+                <p class="mini-label">Tasarımlarınız</p>
+                <div class="thumbs" id="mine"></div>
               </div>
-              {TURNSTILE_SITE_KEY && <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark"></div>}
-              <p class="hint" id="aiNote" aria-live="polite">Taslaktır; baskı tasarımı ekibimizce hazırlanır. Günde 8 deneme hakkınız var.</p>
-            </fieldset>
-            <fieldset>
-              <legend>Peçete ve kutu boyu</legend>
-              <div class="row2">
-                <label for="s-kat">Kat
-                  <select id="s-kat"><option value="3">3 katlı</option><option value="2">2 katlı</option></select>
+
+              <div class="or"><span>ya da</span></div>
+
+              <div class="alts">
+                <button type="button" class="alt" id="altCollection" aria-expanded="false" aria-controls="styleSw">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                  <b>Koleksiyondan</b><small>{STYLES.length - 1} hazır desen</small>
+                </button>
+                <label class="alt" for="upDesign">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                  <b>Görsel yükle</b><small>PNG, JPG, WEBP</small>
                 </label>
-                <label for="s-yaprak">Yaprak sayısı
-                  <select id="s-yaprak"><option value="50">50 yaprak</option><option value="40">40 yaprak</option></select>
-                </label>
+                <button type="button" class="alt" data-s="0" aria-pressed="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="3"/></svg>
+                  <b>Düz renk</b><small>Sade, kurumsal</small>
+                </button>
               </div>
+              <input type="file" id="upDesign" accept="image/png,image/jpeg,image/webp" hidden>
+              <div class="thumbs styles" id="styleSw" hidden>
+                {STYLES.slice(1).map(([id, n], k) => <button type="button" data-s={k + 1} aria-pressed="false" title={n} aria-label={n} style={`background-image:url(/img/stil/${id}.webp)`}></button>)}
+              </div>
+              <p class="note" id="upNote" aria-live="polite"></p>
+            </div>
+
+            <div class="pane" id="pane-1" role="tabpanel" aria-labelledby="tab-1" hidden>
+              <p class="mini-label">Kutu boyu</p>
               <div class="sizes" id="sizes" role="group" aria-label="Kutu boyu">
                 {SIZES.map((s, i) => (
                   <button type="button" data-z={i} aria-pressed={String(i === DEFAULT_SIZE)}>
@@ -309,47 +327,61 @@ const jsonld = [
                   </button>
                 ))}
               </div>
-            </fieldset>
-            <fieldset>
-              <legend>Kutu ve kapak rengi</legend>
+              <p class="mini-label">Kat</p>
+              <div class="seg" data-key="kat" role="group" aria-label="Kat">
+                <button type="button" data-v="3" aria-pressed="true">3 katlı</button>
+                <button type="button" data-v="2" aria-pressed="false">2 katlı</button>
+              </div>
+              <p class="mini-label">Yaprak sayısı</p>
+              <div class="seg" data-key="yaprak" role="group" aria-label="Yaprak sayısı">
+                <button type="button" data-v="50" aria-pressed="true">50 yaprak</button>
+                <button type="button" data-v="40" aria-pressed="false">40 yaprak</button>
+              </div>
+            </div>
+
+            <div class="pane" id="pane-2" role="tabpanel" aria-labelledby="tab-2" hidden>
+              <p class="mini-label">Kutu ve kapak rengi <span class="sw-name" id="bodyName">{BODY[0][0]}</span></p>
               <div class="sw" id="bodySw">
                 {BODY.map(([n, c], i) => <button type="button" style={`--c:${c}`} data-i={i} aria-label={n} aria-pressed={String(i === 0)}></button>)}
-                <span class="sw-name" aria-live="polite">{BODY[0][0]}</span>
               </div>
-            </fieldset>
-            <fieldset>
-              <legend>Baskı rengi</legend>
+              <p class="mini-label">Baskı rengi <span class="sw-name" id="inkName">{INK[0][0]}</span></p>
               <div class="sw" id="inkSw">
                 {INK.map(([n, c], i) => <button type="button" style={`--c:${c}`} data-i={i} aria-label={n} aria-pressed={String(i === 0)}></button>)}
-                <span class="sw-name" aria-live="polite">{INK[0][0]}</span>
               </div>
-            </fieldset>
-            <label for="s-text">Kutu üzerindeki yazı
-              <input id="s-text" maxlength="14" value="Solingo" autocomplete="off">
-            </label>
-            <p class="hint">Markanızın adını yazın; baskıda logonuz kendi yazı karakteriyle uygulanır.</p>
-            <div class="row2">
-              <label for="s-adet">Tahmini adet
-                <select id="s-adet">{QUANTITIES.map(q => <option>{q}</option>)}</select>
+              <label class="field" for="s-text">Kutu üzerindeki yazı
+                <input id="s-text" maxlength="14" value="Solingo" autocomplete="off">
               </label>
-              <label for="s-paket">Paketleme
-                <select id="s-paket">
-                  <option>Tekli kutu</option>
-                  <option>Koli içinde toplu</option>
-                  <option>Hediye paketi</option>
-                </select>
-              </label>
+              <div class="logo-row">
+                <label class="alt alt-inline" for="upLogo">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                  <b id="logoLabel">Logonuzu yükleyin</b>
+                </label>
+                <button type="button" class="link" id="logoClear" hidden>Logoyu kaldır</button>
+              </div>
+              <input type="file" id="upLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+              <p class="note">Logo yüklerseniz kutudaki yazının yerini alır. Baskı dosyasını teklif sonrası bizimle paylaşırsınız.</p>
             </div>
-            <button type="button" class="btn btn-gold" id="useDesign">Bu seçimle teklif isteyin</button>
-          </form>
-        </div>
 
-        <ul class="custom-list">
-          <li class="rv"><span>01</span><h3>Kutu rengi ve deseni</h3><p>Kurumsal renginiz ya da size özel bir desen.</p></li>
-          <li class="rv"><span>02</span><h3>Logo ve yazı</h3><p>Altın, gümüş, beyaz ya da siyah baskı seçenekleri.</p></li>
-          <li class="rv"><span>03</span><h3>Boy ve içerik</h3><p>Dört kutu boyu; 2 ya da 3 katlı, 40 ya da 50 yaprak.</p></li>
-          <li class="rv"><span>04</span><h3>Adet ve paketleme</h3><p>100.000 adetten başlayan üretimde tekli, toplu ya da hediye paketi.</p></li>
-        </ul>
+            <div class="pane" id="pane-3" role="tabpanel" aria-labelledby="tab-3" hidden>
+              <p class="mini-label">Tahmini adet</p>
+              <div class="seg seg-wrap" data-key="adet" role="group" aria-label="Tahmini adet">
+                {QUANTITIES.map((q, i) => <button type="button" data-v={q} aria-pressed={String(i === 0)}>{q}</button>)}
+              </div>
+              <p class="mini-label">Paketleme</p>
+              <div class="seg seg-wrap" data-key="paket" role="group" aria-label="Paketleme">
+                {["Tekli kutu", "Koli içinde toplu", "Hediye paketi"].map((q, i) => <button type="button" data-v={q} aria-pressed={String(i === 0)}>{q}</button>)}
+              </div>
+              <p class="mini-label">Seçimleriniz</p>
+              <dl class="summary" id="summary"></dl>
+              <button type="button" class="btn btn-gold btn-block" id="useDesign">Bu tasarımla teklif isteyin</button>
+            </div>
+
+            <div class="wiz-foot">
+              <button type="button" class="btn btn-line btn-sm" id="wizPrev" hidden>← Geri</button>
+              <button type="button" class="btn btn-gold btn-sm" id="wizNext">Devam →</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
