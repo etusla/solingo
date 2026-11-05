@@ -173,7 +173,7 @@ $("#upLogo").addEventListener("change", e => readImage(e.target, url => {
 }));
 $("#logoClear").addEventListener("click", () => {
   st.logo = null;
-  $("#logoLabel").textContent = "Logonuzu yükleyin";
+  $("#logoLabel").textContent = "Logo ekleyin";
   $("#logoClear").hidden = true;
   paint();
 });

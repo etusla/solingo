@@ -5,7 +5,7 @@ export function GET() {
   const groups = Object.entries(GROUPS).map(([k, v]) => `- ${v}: ${DESIGNS.filter(d => d.g === k).map(d => d.name).join(", ")}`).join("\n");
   const body = `# Solingo
 
-> Solingo, araç içinde kullanılmak üzere tasarlanmış bambu peçete markasıdır. Silindir kutu araç bardaklığına yerleşir; içinde %100 bambu lifinden 3 katlı, 50 yapraklı peçete bulunur. Kutular 21 desende sunulur ve siparişe özel olarak kurumsal renk, logo ve boyda üretilir.
+> Solingo, araç içinde kullanılmak üzere tasarlanmış bambu peçete markasıdır. Silindir kutu araç bardaklığına yerleşir; içinde %100 bambu lifinden 3 katlı, 50 yapraklı peçete bulunur. Kutular 21 desende sunulur ve siparişe özel olarak istediğiniz dizaynda üretilir.
 
 Solingo, ${COMPANY.legalName} markasıdır.
 

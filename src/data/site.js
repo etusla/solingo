@@ -5,7 +5,7 @@ export const SITE = {
   name: "Solingo",
   title: "Solingo — Araç İçi Bambu Peçete | İstediğiniz Dizaynda Üretim",
   description:
-    "Solingo araç içi peçete: bardaklığa tam oturan silindir kutuda %100 bambu, 3 katlı, 50 yapraklı peçete. 21 desen, dilediğiniz renkte ve logonuzla siparişe özel üretim.",
+    "Solingo araç içi peçete: bardaklığa tam oturan silindir kutuda %100 bambu, 3 katlı, 50 yapraklı peçete. 21 desen ve istediğiniz dizaynda siparişe özel üretim.",
   phone: "+90 532 701 21 00",
   phoneHref: "+905327012100",
   whatsapp: "905327012100",
@@ -82,7 +82,7 @@ export const FAQ = [
    "Standart kutuda 3 katlı 50 yaprak peçete bulunur. Siparişe özel üretimde 2 katlı peçete ve 40 yapraklı kutu da seçilebilir."],
   ["Peçete kutusu nasıl kullanılır?",
    "Kapaktaki oval bölümü bastırarak açın; peçeteyi çekerek tek tek kullanın."],
-  ["Kendi markamıza özel kutu üretilebilir mi?",
+  ["İstediğimiz dizaynda kutu üretilebilir mi?",
    "Evet. Kutu rengi, baskı rengi, logo, desen, kapak etiketi, kutu boyu ve paketleme siparişe göre belirlenir. Tasarım onaylandıktan sonra numune hazırlanır."],
   ["Siparişe özel üretimde minimum adet nedir?",
    "Siparişe özel üretim teklifleri 100.000 adetten başlar. Adet, desen ve paketleme tercihinize göre teklif hazırlanır."],
