@@ -447,10 +447,17 @@ const jsonld = [
             <label for="f-eposta">E-posta<input id="f-eposta" name="eposta" type="email" autocomplete="email"></label>
           </div>
           <label for="f-mesaj">Mesajınız<textarea id="f-mesaj" name="mesaj" rows="5" required placeholder="İlgilendiğiniz desen ya da renk, tahmini adet, teslim tarihi…"></textarea></label>
-          <p class="form-err" id="formErr" role="alert" hidden></p>
-          <div class="row2 btns">
-            <button type="submit" class="btn btn-navy" data-via="wa">WhatsApp ile Gönder</button>
-            <button type="submit" class="btn btn-outline" data-via="mail">E-posta ile Gönder</button>
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <p class="form-err" id="formErr" role="alert" aria-live="assertive"></p>
+          <button type="submit" class="btn btn-navy btn-block" id="formSend">Formu Gönder</button>
+          <a class="btn btn-wa btn-block" id="formWa" href={`https://wa.me/${SITE.whatsapp}`} target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.1.1.6-.1 1.2z"/></svg>
+            WhatsApp'tan yazın
+          </a>
+          <div class="form-ok" id="formOk" role="status" hidden>
+            <b>Teşekkürler, talebiniz bize ulaştı.</b>
+            <span>En kısa sürede size dönüş yapacağız.</span>
+            <button type="button" class="link dark" id="formAgain">Yeni bir talep gönderin</button>
           </div>
         </form>
       </div>

@@ -297,38 +297,63 @@ function prefill(text) {
   const m = $("#f-mesaj");
   m.value = text;
   m.classList.remove("invalid");
+  $("#formOk").hidden = true;
   $("#iletisim").scrollIntoView({ behavior: "smooth" });
-  setTimeout(() => $("#f-ad").focus({ preventScroll: true }), 600);
+  setTimeout(() => $("#f-ad").focus({ preventScroll: true }), 700);
 }
 
 // ---------- form ----------
-const form = $("#form"), err = $("#formErr");
-let via = "wa";
-form.querySelectorAll("[data-via]").forEach(b => b.addEventListener("click", () => { via = b.dataset.via; }));
-form.addEventListener("submit", e => {
+const form = $("#form"), err = $("#formErr"), sendB = $("#formSend"), waB = $("#formWa");
+const fields = () => Object.fromEntries(new FormData(form).entries());
+function formText(v) {
+  return [
+    "Merhaba, Solingo hakkında bilgi almak istiyoruz.", "",
+    v.ad ? `Ad Soyad: ${v.ad}` : null, v.firma ? `Firma: ${v.firma}` : null,
+    v.tel ? `Telefon: ${v.tel}` : null, v.eposta ? `E-posta: ${v.eposta}` : null,
+    v.mesaj ? "" : null, v.mesaj || null
+  ].filter(l => l !== null).join("\n");
+}
+// WhatsApp: formda yazılanlar varsa mesaja eklenir, zorunlu alan aranmaz
+waB.addEventListener("click", () => {
+  const v = fields();
+  const filled = v.ad || v.firma || v.mesaj;
+  waB.href = `https://wa.me/${SITE.whatsapp}` + (filled ? `?text=${encodeURIComponent(formText(v))}` : "");
+});
+form.addEventListener("submit", async e => {
   e.preventDefault();
   const req = [...form.querySelectorAll("[required]")];
   const bad = req.filter(f => !f.value.trim());
+  const mail = form.elements.eposta, tel = form.elements.tel;
+  const noContact = !mail.value.trim() && !tel.value.trim();
+  const badMail = mail.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail.value.trim());
   req.forEach(f => f.classList.toggle("invalid", bad.includes(f)));
-  if (bad.length) { err.textContent = "Lütfen adınızı, firmanızı ve mesajınızı yazın."; err.hidden = false; bad[0].focus(); return; }
-  err.hidden = true;
-  const v = Object.fromEntries(new FormData(form).entries());
-  const text = [
-    "Merhaba, Solingo hakkında bilgi almak istiyoruz.", "",
-    `Ad Soyad: ${v.ad}`, `Firma: ${v.firma}`,
-    v.tel ? `Telefon: ${v.tel}` : null,
-    v.eposta ? `E-posta: ${v.eposta}` : null,
-    "", v.mesaj
-  ].filter(l => l !== null).join("\n");
-  if (via === "wa") {
-    const url = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;
-    const w = window.open(url, "_blank");
-    if (w) w.opener = null; else location.href = url;
-  } else {
-    location.href = `mailto:${SITE.email}?subject=${encodeURIComponent("Solingo teklif talebi — " + v.firma)}&body=${encodeURIComponent(text)}`;
+  mail.classList.toggle("invalid", !!badMail || noContact);
+  tel.classList.toggle("invalid", noContact);
+  if (bad.length || noContact || badMail) {
+    err.textContent = bad.length ? "Lütfen adınızı, firmanızı ve mesajınızı yazın."
+      : badMail ? "E-posta adresini kontrol edin." : "Size ulaşabilmemiz için telefon ya da e-posta yazın.";
+    (bad[0] || (badMail ? mail : tel)).focus({ preventScroll: true });
+    return;
+  }
+  err.textContent = "";
+  sendB.disabled = true; sendB.textContent = "Gönderiliyor…";
+  try {
+    const r = await fetch("/api/teklif", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(fields()) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) throw new Error(d.error || "Talebiniz gönderilemedi. Lütfen tekrar deneyin ya da WhatsApp'tan yazın.");
+    $("#formOk").hidden = false;
+    form.reset();
+  } catch (ex) {
+    err.textContent = ex.message;
+  } finally {
+    sendB.disabled = false; sendB.textContent = "Formu Gönder";
   }
 });
-form.addEventListener("input", e => { if (e.target.value.trim()) e.target.classList.remove("invalid"); });
+$("#formAgain").addEventListener("click", () => { $("#formOk").hidden = true; $("#f-ad").focus({ preventScroll: true }); });
+form.addEventListener("input", e => {
+  if (e.target.value.trim()) e.target.classList.remove("invalid");
+  if (err.textContent && !form.querySelector(".invalid")) err.textContent = "";
+});
 
 // ---------- menü ve giriş animasyonu ----------
 const nav = $("#nav");

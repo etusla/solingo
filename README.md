@@ -30,3 +30,17 @@ Bot koruması için Cloudflare Turnstile önerilir:
 1. Cloudflare panelinde **Turnstile → Add widget** ile `solingo.com.tr` için bir widget oluşturun.
 2. Site anahtarını `src/data/site.js` içindeki `TURNSTILE_SITE_KEY` alanına yazın.
 3. Gizli anahtarı Worker'a `TURNSTILE_SECRET` adlı **Secret** olarak ekleyin (solingo → Settings → Variables and Secrets).
+
+## Teklif formu
+
+Form `/api/teklif` uç noktasına gider. Her talep önce KV'ye (`LIMITS`, `teklif:` ile başlayan anahtarlar) kaydedilir, sonra e-posta gönderimi etkinse `i.yldz2106@gmail.com` adresine iletilir.
+
+E-postayı açmak için (alan adı Cloudflare'de etkin olduktan sonra):
+1. **Email Service → Email Routing**'i `solingo.com.tr` için açın.
+2. **Destination addresses** bölümüne `i.yldz2106@gmail.com` adresini ekleyip gelen e-postadaki bağlantıyla doğrulayın.
+3. `wrangler.toml` dosyasına şu bağlamayı ekleyin:
+   ```toml
+   [[send_email]]
+   name = "MAIL"
+   destination_address = "i.yldz2106@gmail.com"
+   ```

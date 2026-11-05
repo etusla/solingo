@@ -146,10 +146,67 @@ export async function handleDesen(request, env) {
   return json({ image, remaining: DAILY_LIMIT - used - 1, model: used_model });
 }
 
+// ---------- teklif formu ----------
+const TO = "i.yldz2106@gmail.com";        // teklifler bu adrese gider (Email Routing'de doğrulanmış olmalı)
+const FROM = "teklif@solingo.com.tr";
+const clean = (v, n) => String(v ?? "").replace(/\r/g, "").trim().slice(0, n);
+
+export async function handleTeklif(request, env) {
+  if (request.method !== "POST") return json({ error: "Yalnızca POST isteği kabul edilir." }, 405);
+  let v;
+  try { v = await request.json(); } catch { return json({ error: "Geçersiz istek." }, 400); }
+  if (v.website) return json({ ok: true });                        // bot tuzağı
+  const t = {
+    ad: clean(v.ad, 120), firma: clean(v.firma, 160), tel: clean(v.tel, 40),
+    eposta: clean(v.eposta, 160), mesaj: clean(v.mesaj, 4000)
+  };
+  if (!t.ad || !t.firma || !t.mesaj) return json({ error: "Lütfen adınızı, firmanızı ve mesajınızı yazın." }, 400);
+  if (!t.tel && !t.eposta) return json({ error: "Size ulaşabilmemiz için telefon ya da e-posta yazın." }, 400);
+  if (t.eposta && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.eposta)) return json({ error: "E-posta adresini kontrol edin." }, 400);
+
+  const ip = request.headers.get("CF-Connecting-IP") || "yerel";
+  if (env.FORM_LIMIT) {
+    const { success } = await env.FORM_LIMIT.limit({ key: ip });
+    if (!success) return json({ error: "Çok fazla deneme yaptınız. Bir dakika sonra tekrar deneyin." }, 429);
+  }
+
+  const at = new Date().toISOString();
+  const id = `teklif:${at}:${crypto.randomUUID().slice(0, 8)}`;
+  const record = { ...t, at, ip, ua: clean(request.headers.get("User-Agent"), 200) };
+
+  // Her talep önce kaydedilir; e-posta gönderimi başarısız olsa da kaybolmaz
+  let saved = false;
+  if (env.LIMITS) { await env.LIMITS.put(id, JSON.stringify(record)); saved = true; }
+
+  let mailed = false;
+  if (env.MAIL) {
+    const lines = [
+      `Ad Soyad: ${t.ad}`, `Firma: ${t.firma}`, `Telefon: ${t.tel || "-"}`, `E-posta: ${t.eposta || "-"}`,
+      "", t.mesaj, "", `Gönderim: ${at}`
+    ];
+    try {
+      await env.MAIL.send({
+        to: TO,
+        from: { email: FROM, name: "Solingo Web Sitesi" },
+        ...(t.eposta ? { replyTo: t.eposta } : {}),
+        subject: `Yeni teklif talebi — ${t.firma}`,
+        text: lines.join("\n")
+      });
+      mailed = true;
+    } catch (e) {
+      console.error("teklif: e-posta gönderilemedi", e && e.message);
+    }
+  }
+  console.log("teklif:", id, { saved, mailed });
+  if (!saved && !mailed) return json({ error: "Talebiniz şu anda kaydedilemedi. Lütfen WhatsApp'tan yazın." }, 503);
+  return json({ ok: true });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/desen") return handleDesen(request, env);
+    if (url.pathname === "/api/teklif") return handleTeklif(request, env);
     return env.ASSETS.fetch(request);
   }
 };

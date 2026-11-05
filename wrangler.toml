@@ -27,7 +27,16 @@ namespace_id = "2106"
   limit = 3
   period = 60
 
-# Kişi başı günlük deneme sayacı
+# Teklif formu: kişi başı dakikada 5 gönderim
+[[ratelimits]]
+name = "FORM_LIMIT"
+namespace_id = "2107"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
+# Kişi başı günlük deneme sayacı ve gelen teklif kayıtları
 [[kv_namespaces]]
 binding = "LIMITS"
 id = "015d14506a754e16a42fe8c863647636"
