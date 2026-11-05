@@ -1,11 +1,43 @@
 // Solingo Worker: statik siteyi sunar, /api/desen ile yapay zekâ desen taslağı üretir.
 
+const W = 640, H = 1280;          // kutu gövdesine uygun dikey oran
+const seed = () => Math.floor(Math.random() * 1e9);
+
+// FLUX.2 modelleri çok parçalı form verisi bekler
+async function multipart(fields) {
+  const form = new FormData();
+  for (const [k, v] of Object.entries(fields)) form.append(k, String(v));
+  const req = new Request("http://form", { method: "POST", body: form });
+  return { multipart: { body: req.body, contentType: req.headers.get("content-type") } };
+}
+
 // Sırayla denenen görsel modelleri; ilki hata verirse sonraki kullanılır
 const MODELS = [
-  ["@cf/black-forest-labs/flux-1-schnell", p => ({ prompt: p, steps: 6, seed: Math.floor(Math.random() * 1e9) })],
-  ["@cf/bytedance/stable-diffusion-xl-lightning", p => ({ prompt: p, width: 768, height: 1024 })],
-  ["@cf/stabilityai/stable-diffusion-xl-base-1.0", p => ({ prompt: p, width: 768, height: 1024, num_steps: 20 })]
+  ["@cf/black-forest-labs/flux-2-klein-9b", p => multipart({ prompt: p, width: W, height: H, seed: seed() })],
+  ["@cf/leonardo/lucid-origin", p => ({ prompt: p, width: W, height: H, guidance: 4.5, seed: seed() })],
+  ["@cf/black-forest-labs/flux-1-schnell", p => ({ prompt: p, steps: 8, seed: seed() })],
+  ["@cf/bytedance/stable-diffusion-xl-lightning", p => ({ prompt: p, width: 768, height: 1024 })]
 ];
+
+// Türkçe tarifi görsel modelinin iyi anladığı ayrıntılı İngilizce bir sanat yönergesine çevirir
+const WRITER = "@cf/meta/llama-3.1-8b-instruct-fast";
+async function artDirection(env, user, colors) {
+  try {
+    const out = await env.AI.run(WRITER, {
+      max_tokens: 160,
+      temperature: 0.6,
+      messages: [
+        { role: "system", content: "You are a senior textile and packaging pattern designer. Turn the customer's request (often in Turkish) into ONE English prompt for an image model that creates a premium, seamless repeating surface pattern printed on a cylindrical tissue box. Describe motifs, composition, scale, rhythm, art style, line quality and an exact color palette. Keep it elegant and print-ready. Never include text, letters, logos, brands, people or a product mockup. Reply with the prompt only, under 70 words." },
+        { role: "user", content: `Request: ${user}${colors ? `\nBrand colors to respect if they fit: ${colors}` : ""}` }
+      ]
+    });
+    const t = String(out && (out.response ?? out.result?.response ?? "")).replace(/^["'\s]+|["'\s]+$/g, "");
+    return t.length > 20 ? t.slice(0, 700) : null;
+  } catch (e) {
+    console.error("desen: tarif çevirisi başarısız", e && e.message);
+    return null;
+  }
+}
 const DAILY_LIMIT = 8;            // kişi (IP) başına günlük deneme
 const MAX_PROMPT = 240;
 
@@ -18,13 +50,12 @@ const json = (data, status = 200) =>
     headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
   });
 
-function buildPrompt(user, colors) {
-  const palette = colors ? ` Preferred colors: ${colors}.` : "";
+function buildPrompt(direction) {
   return [
-    "Seamless repeating surface pattern for printing on a cylindrical paper tissue box label.",
-    "Flat 2D illustration, edge to edge, rich detail, elegant and premium, print ready style.",
-    "No text, no letters, no words, no numbers, no logos, no watermark, no product, no mockup, no frame.",
-    `Design theme: ${user}.${palette}`
+    "Seamless repeating surface pattern, flat front view, fills the entire frame edge to edge, for printing on a premium cylindrical tissue box.",
+    direction,
+    "High-end packaging design, crisp clean shapes, balanced spacing, harmonious colors, sharp details.",
+    "No text, no letters, no words, no logos, no watermark, no product, no box, no mockup, no frame, no border, no people."
   ].join(" ");
 }
 
@@ -90,13 +121,15 @@ export async function handleDesen(request, env) {
   if (!(await verifyTurnstile(env, input.token, ip))) return json({ error: "Güvenlik doğrulaması tamamlanamadı. Sayfayı yenileyip tekrar deneyin." }, 403);
 
   if (!env.AI) return json({ error: "Yapay zekâ servisi bu sitede etkin değil.", code: "ai_binding" }, 503);
-  const full = buildPrompt(prompt, colors);
+  const direction = (await artDirection(env, prompt, colors)) || `Design theme: ${prompt}.${colors ? ` Colors: ${colors}.` : ""}`;
+  const full = buildPrompt(direction);
+  let used_model = "";
   let image = null, lastErr = "";
   for (const [model, args] of MODELS) {
     try {
-      const out = await env.AI.run(model, args(full));
+      const out = await env.AI.run(model, await args(full));
       image = await toDataUri(out);
-      if (image) break;
+      if (image) { used_model = model; break; }
       lastErr = `${model}: beklenmeyen yanıt (${out && typeof out === "object" ? Object.keys(out).join(",") : typeof out})`;
     } catch (e) {
       lastErr = `${model}: ${(e && (e.message || String(e))) || "bilinmeyen hata"}`;
@@ -109,7 +142,8 @@ export async function handleDesen(request, env) {
 
   if (env.LIMITS) await env.LIMITS.put(key, String(used + 1), { expirationTtl: 60 * 60 * 26 });
 
-  return json({ image, remaining: DAILY_LIMIT - used - 1 });
+  console.log("desen: üretildi", used_model);
+  return json({ image, remaining: DAILY_LIMIT - used - 1, model: used_model });
 }
 
 export default {

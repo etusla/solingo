@@ -189,7 +189,7 @@ aiGo.addEventListener("click", async () => {
   if (prompt.length < 3) { aiNote.textContent = "Lütfen istediğiniz deseni birkaç kelimeyle anlatın."; aiNote.classList.add("err"); aiIn.focus(); return; }
   const hasTs = window.turnstile && document.querySelector(".cf-turnstile");
   aiGo.disabled = true; aiGo.textContent = "Hazırlanıyor…";
-  aiNote.textContent = "Desen hazırlanıyor, bu 5–15 saniye sürebilir.";
+  aiNote.textContent = "Deseniniz tasarlanıyor, bu 10–20 saniye sürebilir.";
   $(".preview").classList.add("busy");
   try {
     const r = await fetch("/api/desen", {
