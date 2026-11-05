@@ -1,6 +1,7 @@
-# Cloudflare Workers statik site yayını.
-# Workers Builds "npx wrangler deploy" çalıştırır; önce aşağıdaki komutla Astro sitesi dist/ klasörüne derlenir.
+# Cloudflare Workers yayını: Astro sitesi dist/ klasöründen sunulur, /api/* isteklerini Worker karşılar.
+# Workers Builds "npx wrangler deploy" çalıştırır; önce aşağıdaki komutla site derlenir.
 name = "solingo"
+main = "worker/index.js"
 compatibility_date = "2026-01-01"
 
 [build]
@@ -8,5 +9,25 @@ command = "npm ci --no-audit --no-fund && npm run build"
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 not_found_handling = "404-page"
 html_handling = "auto-trailing-slash"
+run_worker_first = ["/api/*"]
+
+# Yapay zekâ desen taslağı (Workers AI)
+[ai]
+binding = "AI"
+
+# Kişi başı dakikada 3 deneme
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "2106"
+
+  [ratelimits.simple]
+  limit = 3
+  period = 60
+
+# Kişi başı günlük deneme sayacı
+[[kv_namespaces]]
+binding = "LIMITS"
+id = "015d14506a754e16a42fe8c863647636"

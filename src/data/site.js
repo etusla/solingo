@@ -21,6 +21,9 @@ export const COMPANY = {
   country: "TR"
 };
 
+// Cloudflare Turnstile site anahtarı (herkese açık). Boşsa bot doğrulaması gösterilmez.
+export const TURNSTILE_SITE_KEY = "";
+
 export const GROUPS = { duz: "Signature", cicek: "Çiçek", geo: "Geometrik" };
 
 export const DESIGNS = [

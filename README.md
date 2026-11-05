@@ -21,3 +21,12 @@ npm run build    # dist/ klasörüne derler
 ## Yayın
 
 Cloudflare Workers, `main` dalına yapılan her gönderimde `wrangler.toml` içindeki derleme komutunu çalıştırır ve `dist/` klasörünü yayınlar.
+
+## Yapay zekâ desen taslağı
+
+`worker/index.js` içindeki `/api/desen` uç noktası, Cloudflare Workers AI ile desen taslağı üretir. Kişi başı dakikada 3, günde 8 deneme sınırı vardır (`wrangler.toml`: `LIMITER`, `LIMITS`).
+
+Bot koruması için Cloudflare Turnstile önerilir:
+1. Cloudflare panelinde **Turnstile → Add widget** ile `solingo.com.tr` için bir widget oluşturun.
+2. Site anahtarını `src/data/site.js` içindeki `TURNSTILE_SITE_KEY` alanına yazın.
+3. Gizli anahtarı Worker'a `TURNSTILE_SECRET` adlı **Secret** olarak ekleyin (solingo → Settings → Variables and Secrets).

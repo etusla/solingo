@@ -2,7 +2,7 @@
 import Base from "../layouts/Base.astro";
 import {
   SITE, COMPANY, GROUPS, DESIGNS, STYLES, BODY, INK, SIZES, DEFAULT_SIZE, QUANTITIES, FAQ,
-  img, imgMd, imgSm, num, sizeLabel
+  img, imgMd, imgSm, num, sizeLabel, TURNSTILE_SITE_KEY
 } from "../data/site.js";
 
 const counts = Object.fromEntries(Object.keys(GROUPS).map(k => [k, DESIGNS.filter(d => d.g === k).length]));
@@ -276,6 +276,21 @@ const jsonld = [
               </div>
               <p class="hint up-note" id="upNote" aria-live="polite">Yüklediğiniz görsel yalnızca bu önizlemede kullanılır; baskı dosyasını teklif sonrası bizimle paylaşırsınız.</p>
             </fieldset>
+            <fieldset class="ai">
+              <legend>Yapay zekâ ile desen taslağı <span class="beta">Yeni</span></legend>
+              <div class="ai-row">
+                <label for="aiPrompt" class="sr-only">Desen tarifi</label>
+                <input id="aiPrompt" maxlength="240" autocomplete="off" placeholder="Örn. lacivert zemin üzerine altın yapraklar">
+                <button type="button" class="btn btn-gold btn-sm" id="aiGo">Oluştur</button>
+              </div>
+              <div class="ai-ideas" id="aiIdeas">
+                <button type="button">Altın dalgalı lacivert</button>
+                <button type="button">Pastel çiçek bahçesi</button>
+                <button type="button">Minimal geometrik, gri tonlar</button>
+              </div>
+              {TURNSTILE_SITE_KEY && <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark"></div>}
+              <p class="hint" id="aiNote" aria-live="polite">Taslaktır; baskı tasarımı ekibimizce hazırlanır. Günde 8 deneme hakkınız var.</p>
+            </fieldset>
             <fieldset>
               <legend>Peçete ve kutu boyu</legend>
               <div class="row2">
@@ -440,6 +455,7 @@ const jsonld = [
     <div class="lb-foot"><p id="lbName"></p><a href="#iletisim" class="btn btn-gold btn-sm" id="lbAsk">Bu desen için teklif</a></div>
   </dialog>
 
+  {TURNSTILE_SITE_KEY && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
   <script>
     import "../scripts/app.js";
   </script>

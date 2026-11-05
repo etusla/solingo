@@ -79,8 +79,8 @@ swatches($("#bodySw"), BODY, "body");
 swatches($("#inkSw"), INK, "ink");
 
 const styleSw = $("#styleSw");
-function pickStyle(i) {
-  st.style = i === "upload" ? ["upload", "Kendi deseniniz"] : STYLES[i];
+function pickStyle(i, label) {
+  st.style = i === "upload" ? ["upload", label || st.designLabel || "Kendi deseniniz"] : STYLES[i];
   styleSw.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === String(i))));
   $("#styleName").textContent = st.style[1];
   paint();
@@ -111,17 +111,49 @@ function readImage(input, done) {
   r.onerror = () => { note.textContent = "Görsel okunamadı, başka bir dosya deneyin."; };
   r.readAsDataURL(f);
 }
-$("#upDesign").addEventListener("change", e => readImage(e.target, url => {
-  st.design = url;
+function useDesign(url, label, ai) {
+  st.design = url; st.designLabel = label; st.ai = ai || null;
   let b = styleSw.querySelector('[data-s="upload"]');
   if (!b) {
     b = document.createElement("button");
-    b.type = "button"; b.dataset.s = "upload"; b.title = "Kendi deseniniz"; b.setAttribute("aria-label", "Kendi deseniniz");
+    b.type = "button"; b.dataset.s = "upload";
     styleSw.insertBefore(b, $("#styleName"));
   }
+  b.title = label; b.setAttribute("aria-label", label);
   b.style.backgroundImage = `url(${url})`;
-  pickStyle("upload");
-}));
+  pickStyle("upload", label);
+}
+$("#upDesign").addEventListener("change", e => readImage(e.target, url => useDesign(url, "Kendi deseniniz")));
+
+// ---------- yapay zekâ desen taslağı ----------
+const aiIn = $("#aiPrompt"), aiGo = $("#aiGo"), aiNote = $("#aiNote"), AI_NOTE = aiNote.textContent;
+$("#aiIdeas").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { aiIn.value = b.textContent; aiIn.focus(); } });
+aiIn.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); aiGo.click(); } });
+aiGo.addEventListener("click", async () => {
+  const prompt = aiIn.value.trim();
+  if (prompt.length < 3) { aiNote.textContent = "Lütfen istediğiniz deseni birkaç kelimeyle anlatın."; aiIn.focus(); return; }
+  const token = window.turnstile && document.querySelector(".cf-turnstile") ? window.turnstile.getResponse() : "";
+  aiGo.disabled = true; aiGo.textContent = "Hazırlanıyor…";
+  aiNote.textContent = "Desen hazırlanıyor, bu birkaç saniye sürebilir.";
+  $("#can").classList.add("busy");
+  try {
+    const r = await fetch("/api/desen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, token, colors: `${st.body[0]} ve ${st.ink[0]}` })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.image) throw new Error(d.error || "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.");
+    useDesign(d.image, "Yapay zekâ taslağı", prompt);
+    aiNote.textContent = `Taslak kutuya uygulandı. Kalan deneme: ${d.remaining}. Baskı tasarımı ekibimizce hazırlanır.`;
+  } catch (err) {
+    aiNote.textContent = err.message || AI_NOTE;
+  } finally {
+    aiGo.disabled = false; aiGo.textContent = "Oluştur";
+    $("#can").classList.remove("busy");
+    if (window.turnstile && document.querySelector(".cf-turnstile")) window.turnstile.reset();
+  }
+});
 $("#upLogo").addEventListener("change", e => readImage(e.target, url => { st.logo = url; paint(); }));
 
 const shade = (hex, k) => {
@@ -157,6 +189,7 @@ function paint() {
   const src = sid === "duz" ? "" : sid === "upload" ? st.design : `/img/stil/${sid}.webp`;
   attr("#cPat", "href", src || "");
   attr("#cPat", "visibility", src ? "visible" : "hidden");
+  attr("#cPat", "preserveAspectRatio", sid === "upload" ? "xMidYMid slice" : "none");
   const ready = sid !== "duz" && sid !== "upload";
   attr("#cWaves", "visibility", sid === "duz" ? "visible" : "hidden");
   attr("#cIcons", "visibility", sid === "duz" ? "visible" : "hidden");
@@ -170,7 +203,7 @@ paint();
 $("#useDesign").addEventListener("click", () => {
   prefill([
     "Özel üretim için teklif almak istiyoruz.",
-    `Stil: ${st.style[0] === "upload" ? "Kendi desenimiz (dosyayı ayrıca ileteceğiz)" : st.style[1]}`,
+    `Stil: ${st.style[0] !== "upload" ? st.style[1] : st.ai ? `Yapay zekâ taslağı — “${st.ai}”` : "Kendi desenimiz (dosyayı ayrıca ileteceğiz)"}`,
     `${st.style[0] === "duz" ? "Kutu rengi" : "Kapak rengi"}: ${st.body[0]}`,
     `Baskı rengi: ${st.ink[0]}`,
     `Kutu boyu: ${sizeLabel(st.size)}`,
