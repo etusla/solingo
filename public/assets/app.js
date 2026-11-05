@@ -8,7 +8,12 @@
   const stage = () => window.SolingoStage;
 
   const DESIGNS = [
-    { id: "signature",      name: "Signature Lacivert" },
+    { id: "signature",       name: "Signature Lacivert", tex: true },
+    { id: "signature-bordo", name: "Signature Bordo" },
+    { id: "siyah-bakir",     name: "Siyah Bakır" },
+    { id: "lacivert-altin",  name: "Lacivert Altın" },
+    { id: "karbon",          name: "Karbon" },
+    { id: "bordo",           name: "Bordo" },
     { id: "tropik",         name: "Tropik" },
     { id: "aycicegi",       name: "Ayçiçeği" },
     { id: "gelincik",       name: "Gelincik" },
@@ -18,8 +23,15 @@
     { id: "mozaik",         name: "Mozaik" },
     { id: "retro",          name: "Retro" },
     { id: "geometrik-mint", name: "Mint Geometri" },
-    { id: "geometrik-sari", name: "Sarı Geometri" }
+    { id: "geometrik-sari", name: "Sarı Geometri" },
+    { id: "pembe-ucgen",    name: "Pembe Üçgen" },
+    { id: "terrazzo",       name: "Terrazzo" },
+    { id: "lavanta",        name: "Lavanta" },
+    { id: "kiremit",        name: "Kiremit Zikzak" },
+    { id: "lila-dalga",     name: "Lila Dalga" }
   ];
+  // 3D kutuda kullanılabilen desenler (dokusu hazır olanlar)
+  const TEX = new Set(["signature", "tropik", "aycicegi", "gelincik", "kir-cicekleri", "suluboya", "pastel-bahce", "mozaik", "retro", "geometrik-mint", "geometrik-sari"]);
   const nameOf = id => DESIGNS.find(d => d.id === id).name;
 
   const MOMENTS = [
@@ -155,7 +167,7 @@
   }
   function heroCycle() {
     clearInterval(heroTimer);
-    const order = DESIGNS.map(d => d.id);
+    const order = DESIGNS.map(d => d.id).filter(id => TEX.has(id));
     const tick = () => {
       const id = order[heroK % order.length];
       stage() && stage().setDesign(id);
