@@ -1,6 +1,11 @@
 // Solingo Worker: statik siteyi sunar, /api/desen ile yapay zekâ desen taslağı üretir.
 
-const MODEL = "@cf/black-forest-labs/flux-1-schnell";
+// Sırayla denenen görsel modelleri; ilki hata verirse sonraki kullanılır
+const MODELS = [
+  ["@cf/black-forest-labs/flux-1-schnell", p => ({ prompt: p, steps: 6, seed: Math.floor(Math.random() * 1e9) })],
+  ["@cf/bytedance/stable-diffusion-xl-lightning", p => ({ prompt: p, width: 768, height: 1024 })],
+  ["@cf/stabilityai/stable-diffusion-xl-base-1.0", p => ({ prompt: p, width: 768, height: 1024, num_steps: 20 })]
+];
 const DAILY_LIMIT = 8;            // kişi (IP) başına günlük deneme
 const MAX_PROMPT = 240;
 
@@ -84,17 +89,22 @@ export async function handleDesen(request, env) {
 
   if (!(await verifyTurnstile(env, input.token, ip))) return json({ error: "Güvenlik doğrulaması tamamlanamadı. Sayfayı yenileyip tekrar deneyin." }, 403);
 
-  let result;
-  try {
-    result = await env.AI.run(MODEL, { prompt: buildPrompt(prompt, colors), steps: 6, seed: Math.floor(Math.random() * 1e9) });
-  } catch (e) {
-    console.error("desen: AI.run hatası", e && (e.stack || e.message || e));
-    return json({ error: "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.", code: "ai_run" }, 502);
+  if (!env.AI) return json({ error: "Yapay zekâ servisi bu sitede etkin değil.", code: "ai_binding" }, 503);
+  const full = buildPrompt(prompt, colors);
+  let image = null, lastErr = "";
+  for (const [model, args] of MODELS) {
+    try {
+      const out = await env.AI.run(model, args(full));
+      image = await toDataUri(out);
+      if (image) break;
+      lastErr = `${model}: beklenmeyen yanıt (${out && typeof out === "object" ? Object.keys(out).join(",") : typeof out})`;
+    } catch (e) {
+      lastErr = `${model}: ${(e && (e.message || String(e))) || "bilinmeyen hata"}`;
+    }
+    console.error("desen:", lastErr);
   }
-  const image = await toDataUri(result).catch(e => { console.error("desen: dönüştürme hatası", e); return null; });
   if (!image) {
-    console.error("desen: beklenmeyen yanıt", typeof result, result && Object.keys(result));
-    return json({ error: "Desen oluşturulamadı. Tarifi değiştirip tekrar deneyin.", code: "ai_output" }, 502);
+    return json({ error: "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.", code: "ai_run", detail: lastErr.slice(0, 220) }, 502);
   }
 
   if (env.LIMITS) await env.LIMITS.put(key, String(used + 1), { expirationTtl: 60 * 60 * 26 });

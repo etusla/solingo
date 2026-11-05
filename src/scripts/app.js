@@ -200,7 +200,7 @@ aiGo.addEventListener("click", async () => {
     const type = r.headers.get("Content-Type") || "";
     if (!type.includes("json")) throw new Error(`Sunucuya ulaşılamadı (${r.status}). Sayfayı yenileyip tekrar deneyin.`);
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.image) throw new Error((d.error || "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.") + (d.code ? ` [${d.code}]` : ` [${r.status}]`));
+    if (!r.ok || !d.image) throw new Error((d.error || "Desen şu anda oluşturulamadı. Biraz sonra tekrar deneyin.") + (d.code ? ` [${d.code}]` : ` [${r.status}]`) + (d.detail ? ` — ${d.detail}` : ""));
     addMine(d.image, `Yapay zekâ: ${prompt}`, prompt);
     $("#aiLeft").textContent = `Bugün kalan: ${d.remaining}`;
     aiNote.textContent = "Taslak kutuya uygulandı. Beğenmezseniz tarifi değiştirip yeniden oluşturun.";
