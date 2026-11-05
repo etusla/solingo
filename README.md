@@ -1,21 +1,23 @@
 # Solingo — Tanıtım Sitesi
 
-Solingo araç içi bambu peçete için tek sayfalık kurumsal tanıtım sitesi. Derleme adımı yoktur; saf HTML, CSS ve JavaScript.
+Solingo araç içi bambu peçete için tek sayfalık kurumsal site. [Astro](https://astro.build) ile statik olarak derlenir; tarayıcıya yalnızca küçük bir etkileşim betiği gider.
 
-- `public/index.html` — sayfa
-- `public/assets/style.css` — stiller
-- `public/assets/app.js` — koleksiyon filtresi, desen büyütme, özel üretim önizlemesi, iletişim formu (WhatsApp / e-posta)
-- `public/assets/img/g/` — koleksiyon görselleri (800 px ve 1600 px)
-- `public/assets/img/` — araç içi kullanım fotoğrafları
+- `src/data/site.js` — tüm içerik verisi (desenler, renkler, boylar, SSS, firma bilgileri)
+- `src/pages/index.astro` — sayfa ve yapılandırılmış veri (JSON-LD: Organization, Product, FAQPage)
+- `src/pages/sitemap.xml.js`, `src/pages/llms.txt.js` — site haritası ve yapay zekâ özeti, veriden üretilir
+- `src/layouts/Base.astro` — meta etiketleri, Open Graph, yazı tipleri
+- `src/scripts/app.js` — koleksiyon filtresi, desen büyütme, özel üretim önizlemesi, iletişim formu
+- `src/styles/global.css` — stiller
+- `public/` — görseller, `robots.txt`, `_headers`
 
-Desen listesi `public/assets/app.js` içindeki `DESIGNS` dizisindedir; özel üretimdeki renk seçenekleri `BODY` ve `INK` dizilerindedir.
+## Geliştirme
+
+```sh
+npm install
+npm run dev      # http://localhost:4321
+npm run build    # dist/ klasörüne derler
+```
 
 ## Yayın
 
-Cloudflare Workers, `main` dalına yapılan her gönderimi otomatik yayınlar (`wrangler.toml`, `public/` klasörü).
-
-## Yerelde çalıştırma
-
-```sh
-python3 -m http.server 8000 -d public
-```
+Cloudflare Workers, `main` dalına yapılan her gönderimde `wrangler.toml` içindeki derleme komutunu çalıştırır ve `dist/` klasörünü yayınlar.

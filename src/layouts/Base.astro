@@ -1,0 +1,59 @@
+---
+import "@fontsource/cormorant-garamond/latin-ext-600.css";
+import "@fontsource/cormorant-garamond/latin-ext-600-italic.css";
+import "@fontsource/cormorant-garamond/latin-600.css";
+import "@fontsource/cormorant-garamond/latin-600-italic.css";
+import "@fontsource/manrope/latin-ext-400.css";
+import "@fontsource/manrope/latin-ext-600.css";
+import "@fontsource/manrope/latin-ext-700.css";
+import "@fontsource/manrope/latin-400.css";
+import "@fontsource/manrope/latin-600.css";
+import "@fontsource/manrope/latin-700.css";
+import "../styles/global.css";
+import { SITE } from "../data/site.js";
+
+const { title = SITE.title, description = SITE.description, path = "/", jsonld = [], noindex = false } = Astro.props;
+const canonical = new URL(path, SITE.url).href;
+const ogImage = new URL("/img/og.jpg", SITE.url).href;
+---
+<!doctype html>
+<html lang="tr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<meta name="description" content={description}>
+<link rel="canonical" href={canonical}>
+<meta name="robots" content={noindex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1"}>
+<meta name="theme-color" content="#1d2547">
+<meta name="author" content="Solingo">
+<meta name="format-detection" content="telephone=no">
+<link rel="alternate" hreflang="tr" href={canonical}>
+<link rel="alternate" hreflang="x-default" href={canonical}>
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="Solingo">
+<meta property="og:title" content={title}>
+<meta property="og:description" content={description}>
+<meta property="og:url" content={canonical}>
+<meta property="og:image" content={ogImage}>
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Solingo araç içi bambu peçete kutusu">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content={title}>
+<meta name="twitter:description" content={description}>
+<meta name="twitter:image" content={ogImage}>
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<slot name="head" />
+{jsonld.map(d => <script type="application/ld+json" is:inline set:html={JSON.stringify(d)} />)}
+<script is:inline>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+<slot />
+</body>
+</html>

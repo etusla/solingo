@@ -1,0 +1,446 @@
+---
+import Base from "../layouts/Base.astro";
+import {
+  SITE, COMPANY, GROUPS, DESIGNS, STYLES, BODY, INK, SIZES, DEFAULT_SIZE, QUANTITIES, FAQ,
+  img, imgMd, imgSm, num, sizeLabel
+} from "../data/site.js";
+
+const counts = Object.fromEntries(Object.keys(GROUPS).map(k => [k, DESIGNS.filter(d => d.g === k).length]));
+const abs = p => new URL(p, SITE.url).href;
+const orgId = `${SITE.url}/#organization`;
+const productId = `${SITE.url}/#product`;
+
+const jsonld = [
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": orgId,
+        name: "Solingo",
+        legalName: COMPANY.legalName,
+        url: SITE.url,
+        logo: abs("/favicon.svg"),
+        email: SITE.email,
+        telephone: SITE.phone,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: COMPANY.street,
+          addressLocality: COMPANY.district,
+          addressRegion: COMPANY.city,
+          addressCountry: COMPANY.country
+        },
+        contactPoint: [{
+          "@type": "ContactPoint",
+          contactType: "sales",
+          telephone: SITE.phone,
+          email: SITE.email,
+          areaServed: "TR",
+          availableLanguage: ["tr"]
+        }],
+        brand: { "@type": "Brand", name: "Solingo" }
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE.url}/#website`,
+        url: SITE.url,
+        name: "Solingo",
+        inLanguage: "tr-TR",
+        publisher: { "@id": orgId }
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${SITE.url}/#webpage`,
+        url: SITE.url,
+        name: SITE.title,
+        description: SITE.description,
+        inLanguage: "tr-TR",
+        isPartOf: { "@id": `${SITE.url}/#website` },
+        about: { "@id": productId },
+        primaryImageOfPage: abs("/img/arac-signature.webp")
+      },
+      {
+        "@type": "Product",
+        "@id": productId,
+        name: "Solingo Araç İçi Bambu Peçete",
+        description: "Araç bardaklığına tam oturan silindir kutuda %100 bambu lifinden 3 katlı, 50 yapraklı peçete. 21 desen ve siparişe özel renk, logo ve boy seçenekleri.",
+        brand: { "@type": "Brand", name: "Solingo" },
+        manufacturer: { "@id": orgId },
+        category: "Araç içi peçete",
+        material: "%100 bambu lifi",
+        image: [abs("/img/arac-signature.webp"), abs("/img/arac-kullanim.webp"), ...DESIGNS.slice(0, 6).map(d => abs(img(d.id)))],
+        additionalProperty: [
+          { "@type": "PropertyValue", name: "Malzeme", value: "%100 bambu" },
+          { "@type": "PropertyValue", name: "Kat", value: "3 katlı (2 katlı seçeneği)" },
+          { "@type": "PropertyValue", name: "Yaprak sayısı", value: "50 yaprak (40 yaprak seçeneği)" },
+          { "@type": "PropertyValue", name: "Kutu boyları", value: SIZES.map(sizeLabel).join("; ") },
+          { "@type": "PropertyValue", name: "Kullanım", value: "Araç bardaklığına yerleşir; kapaktaki oval bölüm bastırılarak açılır" }
+        ],
+        hasVariant: DESIGNS.map(d => ({
+          "@type": "Product",
+          name: `Solingo ${d.name}`,
+          image: abs(img(d.id)),
+          color: d.name,
+          brand: { "@type": "Brand", name: "Solingo" }
+        }))
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${SITE.url}/#sss`,
+        mainEntity: FAQ.map(([q, a]) => ({
+          "@type": "Question",
+          name: q,
+          acceptedAnswer: { "@type": "Answer", text: a }
+        }))
+      }
+    ]
+  }
+];
+---
+<Base jsonld={jsonld}>
+  <link slot="head" rel="preload" as="image" href="/img/arac-signature-720.webp" imagesrcset="/img/arac-signature-480.webp 480w, /img/arac-signature-720.webp 720w" imagesizes="(max-width: 820px) 92vw, 460px" fetchpriority="high">
+
+  <header class="nav" id="nav">
+    <div class="wrap nav-in">
+      <a href="/" class="logo" aria-label="Solingo ana sayfa">Solingo<sup>®</sup></a>
+      <nav aria-label="Ana menü">
+        <a href="#konfor">Ürün</a>
+        <a href="#koleksiyon">Koleksiyon</a>
+        <a href="#ozel">Özel Üretim</a>
+        <a href="#sss">SSS</a>
+        <a href="#iletisim" class="nav-cta">Teklif Alın</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <section class="hero" aria-labelledby="hero-title">
+      <svg class="lines" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M-10 560 C 180 470, 330 600, 520 470 S 760 330, 820 360"/>
+          <path d="M-10 575 C 180 485, 330 615, 520 485 S 760 345, 820 375"/>
+          <path d="M-10 590 C 180 500, 330 630, 520 500 S 760 360, 820 390"/>
+          <path d="M-10 605 C 180 515, 330 645, 520 515 S 760 375, 820 405"/>
+        </g>
+      </svg>
+      <div class="wrap hero-in">
+        <div class="hero-copy rv">
+          <p class="kicker">Araç içi bambu peçete</p>
+          <h1 id="hero-title">Her an için<br><em>bir Solingo.</em></h1>
+          <p class="lead">Aracınızın bardaklığına tam oturan silindir kutuda, %100 bambudan üretilmiş yumuşacık peçete. Koleksiyondan seçin ya da dilediğiniz renkte, markanıza özel ürettirin.</p>
+          <div class="actions">
+            <a href="#iletisim" class="btn btn-gold">Teklif Alın</a>
+            <a href="#koleksiyon" class="btn btn-line">Koleksiyonu İnceleyin</a>
+          </div>
+        </div>
+        <figure class="hero-photo rv">
+          <img src="/img/arac-signature-720.webp" srcset="/img/arac-signature-480.webp 480w, /img/arac-signature-720.webp 720w" sizes="(max-width: 820px) 92vw, 460px" alt="Araç bardaklığında duran lacivert Solingo peçete kutusu" width="720" height="1280" fetchpriority="high">
+        </figure>
+      </div>
+      <div class="wrap">
+        <ul class="facts rv" aria-label="Ürün bilgileri">
+          <li><b>%100</b><span>Bambu lifi</span></li>
+          <li><b>3</b><span>Kat</span></li>
+          <li><b>50</b><span>Yaprak</span></li>
+          <li><b>Ø 6,8</b><span>cm, bardaklık uyumlu</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section konfor" id="konfor" aria-labelledby="konfor-title">
+      <div class="wrap konfor-in">
+        <figure class="konfor-photo rv">
+          <img src="/img/arac-kullanim-800.webp" srcset="/img/arac-kullanim-480.webp 480w, /img/arac-kullanim-800.webp 800w" sizes="(max-width: 820px) 92vw, 540px" alt="Araç bardaklığındaki Solingo kutusundan peçete alınırken" width="800" height="810" loading="lazy" decoding="async">
+        </figure>
+        <div class="konfor-copy">
+          <p class="kicker dark rv">Sürücü ve yolcu konforu</p>
+          <h2 id="konfor-title" class="rv">Yolculuk boyunca<br><em>yanınızda.</em></h2>
+          <p class="sec-lead rv">Solingo, peçeteyi torpidoda aranan bir paket olmaktan çıkarır. Bardaklıkta sabit durur, ihtiyaç anında tek hareketle elinizin altındadır.</p>
+          <ul class="features">
+            <li class="rv">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="8" rx="8" ry="3"/><path d="M8 8v16c0 1.7 3.6 3 8 3s8-1.3 8-3V8"/><path d="M4 22c0 3 5.4 5.5 12 5.5S28 25 28 22"/></svg>
+              <div><h3>Bardaklığa tam oturur</h3><p>Araç bardaklıklarına uyumlu çapı sayesinde virajda devrilmez, yer kaplamaz.</p></div>
+            </li>
+            <li class="rv">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4c-3 3-5 5-5 8a5 5 0 0 0 10 0c0-3-2-5-5-8z"/><path d="M9 28h14M12 22h8"/></svg>
+              <div><h3>Tek hareketle kullanım</h3><p>Kapaktaki oval bölümü bastırarak açın; peçeteler tek tek çekilir.</p></div>
+            </li>
+            <li class="rv">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 29V4M16 10c-3-1-6-1-8 1M16 16c3-1 6-1 8 1M16 22c-3-1-6-1-8 1"/></svg>
+              <div><h3>Bambunun yumuşaklığı</h3><p>%100 bambu lifinden 3 katlı peçete; cilde nazik, kolay yırtılmaz.</p></div>
+            </li>
+            <li class="rv">
+              <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="6" y="5" width="20" height="23" rx="3"/><path d="M11 11h10M11 16h10M11 21h6"/></svg>
+              <div><h3>Düzenli bir araç içi</h3><p>50 yaprak kutusunda kalır; dağılmaz, araçta dağınıklık yaratmaz.</p></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section collection" id="koleksiyon" aria-labelledby="koleksiyon-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="kicker dark rv">Koleksiyon</p>
+          <h2 id="koleksiyon-title" class="rv">Yirmi bir desen,<br><em>tek Solingo.</em></h2>
+          <p class="sec-lead rv">Sade çizgilerden canlı çiçek desenlerine; her kutu aynı kalite ve aynı ölçüde. Bir desene dokunarak yakından inceleyebilirsiniz.</p>
+        </div>
+        <div class="filters rv" id="filters" role="group" aria-label="Koleksiyon filtresi">
+          <button type="button" class="filter" data-f="all" aria-pressed="true">Tümü <small>{DESIGNS.length}</small></button>
+          {Object.entries(GROUPS).map(([k, v]) => <button type="button" class="filter" data-f={k} aria-pressed="false">{v} <small>{counts[k]}</small></button>)}
+        </div>
+        <ul class="grid" id="grid" role="list">
+          {DESIGNS.map((d, i) => (
+            <li class="card" data-i={i} data-g={d.g} data-id={d.id} data-name={d.name}>
+              <button type="button" class="card-btn">
+                <span class="ph"><img src={imgMd(d.id)} srcset={`${imgSm(d.id)} 400w, ${imgMd(d.id)} 800w`} sizes="(max-width: 600px) 45vw, (max-width: 1000px) 30vw, 280px" alt={`Solingo ${d.name} desenli araç içi peçete kutusu`} width="800" height="800" loading="lazy" decoding="async"></span>
+                <span class="nm"><b>{d.name}</b><small>{GROUPS[d.g]}</small></span>
+              </button>
+            </li>
+          ))}
+          <li class="card cta">
+            <a href="#ozel" class="card-btn">
+              <span class="ph"><span class="cta-in"><em>Size özel</em><b>renk ve desen</b><small>Kurumsal renklerinizle üretim →</small></span></span>
+              <span class="nm"><b>Özel Üretim</b><small>Siparişe özel</small></span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section ozel" id="ozel" aria-labelledby="ozel-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="kicker rv">Siparişe özel üretim</p>
+          <h2 id="ozel-title" class="rv">Renginizi seçin,<br><em>kutunuzu biz üretelim.</em></h2>
+          <p class="sec-lead rv">Koleksiyondaki desenlerin yanı sıra kutu rengini, baskı rengini, kutu boyunu ve üzerindeki yazıyı kurumsal kimliğinize göre belirleyebilirsiniz. Aşağıda deneyin; seçiminiz teklif formuna aktarılır.</p>
+        </div>
+
+        <div class="studio rv">
+          <div class="preview">
+            <svg id="can" viewBox="0 0 240 440" role="img" aria-label="Özelleştirilmiş kutu önizlemesi">
+              <defs>
+                <linearGradient id="shade" x1="0" x2="1">
+                  <stop offset="0" stop-color="#000" stop-opacity=".38"/>
+                  <stop offset=".22" stop-color="#fff" stop-opacity=".14"/>
+                  <stop offset=".45" stop-color="#fff" stop-opacity=".05"/>
+                  <stop offset=".8" stop-color="#000" stop-opacity=".16"/>
+                  <stop offset="1" stop-color="#000" stop-opacity=".42"/>
+                </linearGradient>
+                <clipPath id="bodyClip"><path d="M40 70 V400 A80 16 0 0 0 200 400 V70 Z"/></clipPath>
+              </defs>
+              <ellipse cx="120" cy="414" rx="96" ry="14" fill="#000" opacity=".16"/>
+              <g clip-path="url(#bodyClip)">
+                <rect id="cBody" x="40" y="60" width="160" height="360" fill="#1d2547"/>
+                <image id="cPat" x="40" y="78" width="160" height="342" preserveAspectRatio="none" href="" visibility="hidden"/>
+                <g id="cWaves" fill="none" stroke-width="1.4" stroke="#d2bc86" opacity=".9">
+                  <path d="M30 420 C 80 380, 120 410, 150 360 S 190 300, 215 300"/>
+                  <path d="M30 410 C 80 370, 120 400, 150 350 S 190 290, 215 290"/>
+                  <path d="M30 400 C 80 360, 120 390, 150 340 S 190 280, 215 280"/>
+                  <path d="M30 390 C 80 350, 120 380, 150 330 S 190 270, 215 270"/>
+                  <path d="M30 380 C 80 340, 120 370, 150 320 S 190 260, 215 260"/>
+                </g>
+                <text id="cText" x="0" y="0" transform="translate(132 205) rotate(-90)" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-weight="600" font-size="46" fill="#d2bc86">Solingo</text>
+                <image id="cLogo" x="-110" y="-30" width="220" height="60" transform="translate(126 205) rotate(-90)" preserveAspectRatio="xMidYMid meet" href="" visibility="hidden"/>
+                <g id="cIcons" fill="#d2bc86" font-family="Manrope, sans-serif" font-size="6" font-weight="700" text-anchor="middle" letter-spacing=".4">
+                  <text x="80" y="296">%100</text><text x="80" y="304">BAMBU</text>
+                  <text x="120" y="296" id="cYaprak">50</text><text x="120" y="304">YAPRAK</text>
+                  <text x="160" y="296" id="cKat">3 KATLI</text><text x="160" y="304">PEÇETE</text>
+                </g>
+                <rect x="40" y="60" width="160" height="360" fill="url(#shade)"/>
+              </g>
+              <path id="cRim" d="M37 58 V82 A83 17 0 0 0 203 82 V58 Z" fill="#1d2547"/>
+              <path d="M37 58 V82 A83 17 0 0 0 203 82 V58 Z" fill="url(#shade)"/>
+              <ellipse id="cLid" cx="120" cy="58" rx="83" ry="17" fill="#232c55"/>
+              <ellipse id="cLabel" cx="120" cy="58" rx="52" ry="10.5" fill="none" stroke="#d2bc86" stroke-width="1.2"/>
+              <text id="cLidText" x="120" y="62" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-weight="600" font-size="13" fill="#d2bc86">Solingo</text>
+            </svg>
+            <p class="dims" id="dims" aria-live="polite">{sizeLabel(SIZES[DEFAULT_SIZE])} · 3 katlı · 50 yaprak</p>
+          </div>
+
+          <form class="options" id="studio" onsubmit="return false">
+            <fieldset>
+              <legend>Stil</legend>
+              <div class="styles" id="styleSw">
+                {STYLES.map(([id, n], i) => id === "duz"
+                  ? <button type="button" class="plain" data-s={i} aria-pressed="true" title={n}><span>Düz</span></button>
+                  : <button type="button" data-s={i} aria-pressed="false" title={n} aria-label={n} style={`background-image:url(/img/stil/${id}.webp)`}></button>)}
+                <span class="sw-name" id="styleName">Düz renk</span>
+              </div>
+              <div class="uploads">
+                <label class="up" for="upDesign"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Kendi deseninizi yükleyin</label>
+                <input type="file" id="upDesign" accept="image/png,image/jpeg,image/webp" hidden>
+                <label class="up" for="upLogo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Logonuzu yükleyin</label>
+                <input type="file" id="upLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+              </div>
+              <p class="hint up-note" id="upNote" aria-live="polite">Yüklediğiniz görsel yalnızca bu önizlemede kullanılır; baskı dosyasını teklif sonrası bizimle paylaşırsınız.</p>
+            </fieldset>
+            <fieldset>
+              <legend>Peçete ve kutu boyu</legend>
+              <div class="row2">
+                <label for="s-kat">Kat
+                  <select id="s-kat"><option value="3">3 katlı</option><option value="2">2 katlı</option></select>
+                </label>
+                <label for="s-yaprak">Yaprak sayısı
+                  <select id="s-yaprak"><option value="50">50 yaprak</option><option value="40">40 yaprak</option></select>
+                </label>
+              </div>
+              <div class="sizes" id="sizes" role="group" aria-label="Kutu boyu">
+                {SIZES.map((s, i) => (
+                  <button type="button" data-z={i} aria-pressed={String(i === DEFAULT_SIZE)}>
+                    <i style={`height:${Math.round(s.h * 4.2)}px;width:${Math.round(s.d * 4.2)}px`}></i>
+                    <b>{num(s.h)} cm</b><small>Ø {num(s.d)}</small>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Kutu ve kapak rengi</legend>
+              <div class="sw" id="bodySw">
+                {BODY.map(([n, c], i) => <button type="button" style={`--c:${c}`} data-i={i} aria-label={n} aria-pressed={String(i === 0)}></button>)}
+                <span class="sw-name" aria-live="polite">{BODY[0][0]}</span>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Baskı rengi</legend>
+              <div class="sw" id="inkSw">
+                {INK.map(([n, c], i) => <button type="button" style={`--c:${c}`} data-i={i} aria-label={n} aria-pressed={String(i === 0)}></button>)}
+                <span class="sw-name" aria-live="polite">{INK[0][0]}</span>
+              </div>
+            </fieldset>
+            <label for="s-text">Kutu üzerindeki yazı
+              <input id="s-text" maxlength="14" value="Solingo" autocomplete="off">
+            </label>
+            <p class="hint">Markanızın adını yazın; baskıda logonuz kendi yazı karakteriyle uygulanır.</p>
+            <div class="row2">
+              <label for="s-adet">Tahmini adet
+                <select id="s-adet">{QUANTITIES.map(q => <option>{q}</option>)}</select>
+              </label>
+              <label for="s-paket">Paketleme
+                <select id="s-paket">
+                  <option>Tekli kutu</option>
+                  <option>Koli içinde toplu</option>
+                  <option>Hediye paketi</option>
+                </select>
+              </label>
+            </div>
+            <button type="button" class="btn btn-gold" id="useDesign">Bu seçimle teklif isteyin</button>
+          </form>
+        </div>
+
+        <ul class="custom-list">
+          <li class="rv"><span>01</span><h3>Kutu rengi ve deseni</h3><p>Kurumsal renginiz ya da size özel bir desen.</p></li>
+          <li class="rv"><span>02</span><h3>Logo ve yazı</h3><p>Altın, gümüş, beyaz ya da siyah baskı seçenekleri.</p></li>
+          <li class="rv"><span>03</span><h3>Boy ve içerik</h3><p>Dört kutu boyu; 2 ya da 3 katlı, 40 ya da 50 yaprak.</p></li>
+          <li class="rv"><span>04</span><h3>Adet ve paketleme</h3><p>100.000 adetten başlayan üretimde tekli, toplu ya da hediye paketi.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section process" aria-labelledby="process-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="kicker dark rv">Çalışma şeklimiz</p>
+          <h2 id="process-title" class="rv">Talebinizden teslimata<br><em>dört adımda.</em></h2>
+        </div>
+        <ol class="steps">
+          <li class="rv"><span>1</span><h3>Talep</h3><p>Desen, renk ve adet ihtiyacınızı bize iletin.</p></li>
+          <li class="rv"><span>2</span><h3>Tasarım onayı</h3><p>Kutunuzun görselini hazırlar, onayınıza sunarız.</p></li>
+          <li class="rv"><span>3</span><h3>Numune</h3><p>Üretim öncesinde örnek ürünü inceleyebilirsiniz.</p></li>
+          <li class="rv"><span>4</span><h3>Üretim ve teslimat</h3><p>Planlanan takvimde üretilip adresinize teslim edilir.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section faq" id="sss" aria-labelledby="sss-title">
+      <div class="wrap faq-in">
+        <div class="sec-head">
+          <p class="kicker dark rv">Sıkça sorulan sorular</p>
+          <h2 id="sss-title" class="rv">Merak<br><em>edilenler.</em></h2>
+        </div>
+        <div class="faq-list">
+          {FAQ.map(([q, a], i) => (
+            <details class="rv" open={i === 0}>
+              <summary><h3>{q}</h3></summary>
+              <p>{a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="quote-band" aria-label="Solingo">
+      <div class="wrap">
+        <p class="rv">“Hayat bazen dağılır.<br><em>Solingo toparlar.</em>”</p>
+      </div>
+    </section>
+
+    <section class="section contact" id="iletisim" aria-labelledby="iletisim-title">
+      <div class="wrap contact-in">
+        <div class="c-copy">
+          <p class="kicker dark rv">İletişim</p>
+          <h2 id="iletisim-title" class="rv">Teklif ve<br><em>numune talebi.</em></h2>
+          <p class="sec-lead rv">Formu doldurun, size en kısa sürede dönüş yapalım. Dilerseniz doğrudan da ulaşabilirsiniz.</p>
+          <ul class="direct rv">
+            <li><span>Telefon</span><a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a></li>
+            <li><span>E-posta</span><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+            <li><span>WhatsApp</span><a href={`https://wa.me/${SITE.whatsapp}`} target="_blank" rel="noopener">Mesaj gönderin</a></li>
+            <li><span>Adres</span><address>Anadolu Mah. Ankarayolu Cad. No:71<br>{COMPANY.district} / {COMPANY.city}</address></li>
+          </ul>
+        </div>
+        <form class="form rv" id="form" novalidate>
+          <div class="row2">
+            <label for="f-ad">Ad Soyad<input id="f-ad" name="ad" required autocomplete="name"></label>
+            <label for="f-firma">Firma<input id="f-firma" name="firma" required autocomplete="organization"></label>
+          </div>
+          <div class="row2">
+            <label for="f-tel">Telefon<input id="f-tel" name="tel" type="tel" inputmode="tel" autocomplete="tel"></label>
+            <label for="f-eposta">E-posta<input id="f-eposta" name="eposta" type="email" autocomplete="email"></label>
+          </div>
+          <label for="f-mesaj">Mesajınız<textarea id="f-mesaj" name="mesaj" rows="5" required placeholder="İlgilendiğiniz desen ya da renk, tahmini adet, teslim tarihi…"></textarea></label>
+          <p class="form-err" id="formErr" role="alert" hidden></p>
+          <div class="row2 btns">
+            <button type="submit" class="btn btn-navy" data-via="wa">WhatsApp ile Gönder</button>
+            <button type="submit" class="btn btn-outline" data-via="mail">E-posta ile Gönder</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap foot-in">
+      <div>
+        <a href="/" class="logo">Solingo<sup>®</sup></a>
+        <p>Araç içi bambu peçete.<br>%100 bambu · 3 katlı · 50 yaprak</p>
+        <p class="company">{COMPANY.legalName}<br>{COMPANY.street}<br>{COMPANY.district} / {COMPANY.city}</p>
+      </div>
+      <nav aria-label="Alt menü">
+        <a href="#konfor">Ürün</a>
+        <a href="#koleksiyon">Koleksiyon</a>
+        <a href="#ozel">Özel Üretim</a>
+        <a href="#sss">Sıkça Sorulan Sorular</a>
+        <a href="#iletisim">İletişim</a>
+      </nav>
+      <div class="foot-contact">
+        <a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </div>
+    </div>
+    <div class="wrap foot-bottom">© {new Date().getFullYear()} Solingo, bir {COMPANY.shortName} markasıdır. Tüm hakları saklıdır.</div>
+  </footer>
+
+  <dialog class="lb" id="lb" aria-label="Desen">
+    <button class="lb-x" type="button" data-close aria-label="Kapat">✕</button>
+    <button class="lb-nav prev" type="button" data-step="-1" aria-label="Önceki desen">‹</button>
+    <button class="lb-nav next" type="button" data-step="1" aria-label="Sonraki desen">›</button>
+    <img id="lbImg" alt="" width="1600" height="1600">
+    <div class="lb-foot"><p id="lbName"></p><a href="#iletisim" class="btn btn-gold btn-sm" id="lbAsk">Bu desen için teklif</a></div>
+  </dialog>
+
+  <script>
+    import "../scripts/app.js";
+  </script>
+</Base>

@@ -1,7 +1,12 @@
-# Cloudflare Workers statik site yayını (Workers Builds varsayılan "npx wrangler deploy" ile çalışır)
+# Cloudflare Workers statik site yayını.
+# Workers Builds "npx wrangler deploy" çalıştırır; önce aşağıdaki komutla Astro sitesi dist/ klasörüne derlenir.
 name = "solingo"
 compatibility_date = "2026-01-01"
 
+[build]
+command = "npm ci --no-audit --no-fund && npm run build"
+
 [assets]
-directory = "./public"
-not_found_handling = "single-page-application"
+directory = "./dist"
+not_found_handling = "404-page"
+html_handling = "auto-trailing-slash"
