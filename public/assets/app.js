@@ -2,7 +2,7 @@
   "use strict";
 
   const PHONE = "905327012100";
-  const EMAIL = "i.yldz2106@gmail.com";
+  const EMAIL = "info@solingo.com.tr";
   const IMG = "assets/img/g/";
   const $ = s => document.querySelector(s);
 

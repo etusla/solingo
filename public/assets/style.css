@@ -167,6 +167,8 @@ h1 em,h2 em{font-style:italic;color:var(--gold-ink)}
 .direct span{font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .direct a{font-size:1.1rem;font-weight:700;color:var(--navy);text-decoration:none}
 .direct a:hover{color:var(--gold-ink)}
+.direct address{font-style:normal;font-weight:600;color:var(--navy);line-height:1.5}
+.footer .company{font-size:.86rem;color:#9ea3ba}
 .form{display:flex;flex-direction:column;gap:16px;padding:34px;border-radius:26px;background:#fff;border:1px solid var(--line);box-shadow:0 30px 60px -44px rgba(21,27,56,.45)}
 .form label{display:flex;flex-direction:column;gap:7px;font-size:.8rem;font-weight:700;color:var(--navy);letter-spacing:.03em}
 .form input,.form textarea{color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:13px 14px;width:100%;font-weight:500;letter-spacing:0;transition:border-color .2s,box-shadow .2s}
