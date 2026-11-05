@@ -104,7 +104,49 @@
     ["Orman Yeşili", "#1f4436"], ["Gri Mavi", "#8ea8aa"], ["Kum", "#c8b597"], ["Krem", "#efe8d8"]
   ];
   const INK = [["Altın", "#d2bc86"], ["Gümüş", "#c9ccd3"], ["Beyaz", "#ffffff"], ["Siyah", "#1b1b1e"]];
-  const st = { body: BODY[0], ink: INK[0] };
+  const STYLES = [
+    ["duz", "Düz renk"], ["tropik", "Tropik"], ["aycicegi", "Ayçiçeği"], ["gelincik", "Gelincik"],
+    ["kir-cicekleri", "Kır Çiçekleri"], ["suluboya", "Suluboya"], ["pastel-bahce", "Pastel Bahçe"],
+    ["mozaik", "Mozaik"], ["retro", "Retro"], ["geometrik-mint", "Mint Geometri"], ["geometrik-sari", "Sarı Geometri"],
+    ["pembe-ucgen", "Pembe Üçgen"], ["terrazzo", "Terrazzo"], ["lavanta", "Lavanta"], ["kiremit", "Kiremit Zikzak"], ["lila-dalga", "Lila Dalga"]
+  ];
+  const st = { body: BODY[0], ink: INK[0], style: STYLES[0], design: null, logo: null };
+  const styleSw = $("#styleSw");
+  styleSw.innerHTML = STYLES.map(([id, n], i) => id === "duz"
+    ? `<button type="button" class="plain" data-s="${i}" aria-pressed="true" title="${n}"><span>Düz</span></button>`
+    : `<button type="button" data-s="${i}" aria-pressed="false" title="${n}" aria-label="${n}" style="background-image:url(assets/img/stil/${id}.webp)"></button>`
+  ).join("") + `<span class="sw-name" id="styleName">Düz renk</span>`;
+  function pickStyle(i) {
+    st.style = i === "upload" ? ["upload", "Kendi deseniniz"] : STYLES[i];
+    styleSw.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === String(i))));
+    $("#styleName").textContent = st.style[1];
+    paint();
+  }
+  styleSw.addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (b) pickStyle(b.dataset.s === "upload" ? "upload" : +b.dataset.s); });
+
+  const note = $("#upNote"), NOTE = note.textContent;
+  function readImage(input, done) {
+    const f = input.files && input.files[0];
+    input.value = "";
+    if (!f) return;
+    if (!/^image\//.test(f.type)) { note.textContent = "Lütfen PNG, JPG, WEBP ya da SVG biçiminde bir görsel seçin."; return; }
+    if (f.size > 10 * 1024 * 1024) { note.textContent = "Görsel 10 MB'tan küçük olmalı."; return; }
+    const r = new FileReader();
+    r.onload = () => { note.textContent = NOTE; done(r.result, f.name); };
+    r.onerror = () => { note.textContent = "Görsel okunamadı, başka bir dosya deneyin."; };
+    r.readAsDataURL(f);
+  }
+  $("#upDesign").addEventListener("change", e => readImage(e.target, (url, name) => {
+    st.design = { url, name };
+    let b = styleSw.querySelector('[data-s="upload"]');
+    if (!b) {
+      b = document.createElement("button"); b.type = "button"; b.dataset.s = "upload"; b.title = "Kendi deseniniz"; b.setAttribute("aria-label", "Kendi deseniniz");
+      styleSw.insertBefore(b, $("#styleName"));
+    }
+    b.style.backgroundImage = `url(${url})`;
+    pickStyle("upload");
+  }));
+  $("#upLogo").addEventListener("change", e => readImage(e.target, (url, name) => { st.logo = { url, name }; paint(); }));
   function swatches(el, list, key) {
     el.innerHTML = list.map(([n, c], i) => `<button type="button" style="--c:${c}" data-i="${i}" aria-label="${n}" aria-pressed="${i === 0}"></button>`).join("") +
       `<span class="sw-name" aria-live="polite">${list[0][0]}</span>`;
@@ -136,6 +178,18 @@
     $("#cLidText").textContent = t;
     const len = [...t].length;
     $("#cText").setAttribute("font-size", String(Math.min(46, Math.round(300 / Math.max(len, 1)))));
+    // stil: hazır desenlerin üzerinde logo zaten basılıdır
+    const sid = st.style[0], pat = $("#cPat");
+    const src = sid === "duz" ? "" : sid === "upload" ? (st.design && st.design.url) : `assets/img/stil/${sid}.webp`;
+    pat.setAttribute("href", src || "");
+    pat.setAttribute("visibility", src ? "visible" : "hidden");
+    const ready = sid !== "duz" && sid !== "upload";
+    $("#cWaves").setAttribute("visibility", sid === "duz" ? "visible" : "hidden");
+    $("#cIcons").setAttribute("visibility", sid === "duz" ? "visible" : "hidden");
+    const logo = $("#cLogo");
+    logo.setAttribute("href", st.logo ? st.logo.url : "");
+    logo.setAttribute("visibility", st.logo ? "visible" : "hidden");
+    $("#cText").setAttribute("visibility", ready || st.logo ? "hidden" : "visible");
     $("#cLidText").setAttribute("font-size", String(Math.min(13, Math.round(86 / Math.max(len, 1)))));
   }
   swatches($("#bodySw"), BODY, "body");
@@ -146,9 +200,10 @@
   $("#useDesign").addEventListener("click", () => {
     prefill([
       "Özel üretim için teklif almak istiyoruz.",
-      `Kutu rengi: ${st.body[0]}`,
+      `Stil: ${st.style[0] === "upload" ? "Kendi desenimiz (dosyayı ayrıca ileteceğiz)" : st.style[1]}`,
+      `${st.style[0] === "duz" ? "Kutu rengi" : "Kapak rengi"}: ${st.body[0]}`,
       `Baskı rengi: ${st.ink[0]}`,
-      `Kutu üzerindeki yazı: ${textIn.value.trim() || "Solingo"}`,
+      st.logo ? "Logo: Kendi logomuz (dosyayı ayrıca ileteceğiz)" : `Kutu üzerindeki yazı: ${textIn.value.trim() || "Solingo"}`,
       `Tahmini adet: ${$("#s-adet").value}`,
       `Paketleme: ${$("#s-paket").value}`
     ].join("\n"));
