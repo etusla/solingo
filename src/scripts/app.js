@@ -255,6 +255,17 @@ function paint() {
   attr("#cLogo", "href", st.logo || "");
   attr("#cLogo", "visibility", st.logo ? "visible" : "hidden");
   attr("#cText", "visibility", ready || st.logo ? "hidden" : "visible");
+  // kendi ya da yapay zekâ deseninde yazı, orijinal kutulardaki gibi koyu bir etiketin içinde durur
+  const badge = !!st.custom && !st.logo;
+  attr("#cBadge", "visibility", badge ? "visible" : "hidden");
+  if (badge) {
+    const bb = $("#cText").getBBox();
+    const px = bb.height * 0.32, py = bb.height * 0.12;
+    attr("#cBadge", "x", String(bb.x - px)); attr("#cBadge", "y", String(bb.y + py));
+    attr("#cBadge", "width", String(bb.width + 2 * px)); attr("#cBadge", "height", String(bb.height - py * 0.6));
+    attr("#cBadge", "rx", String(bb.height * 0.28));
+    attr("#cBadge", "fill", st.ink[1] === "#1b1b1e" ? "#f5efe0" : shade(st.body[1], 0.85));
+  }
   if (wizStep === panes.length - 1) summary();
 }
 textIn.addEventListener("input", paint);

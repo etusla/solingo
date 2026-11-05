@@ -27,7 +27,7 @@ async function artDirection(env, user, colors) {
       max_tokens: 160,
       temperature: 0.6,
       messages: [
-        { role: "system", content: "You are a senior textile and packaging pattern designer. Turn the customer's request (often in Turkish) into ONE English prompt for an image model that creates a premium, seamless repeating surface pattern printed on a cylindrical tissue box. Describe motifs, composition, scale, rhythm, art style, line quality and an exact color palette. Keep it elegant and print-ready. Never include text, letters, logos, brands, people or a product mockup. Reply with the prompt only, under 70 words." },
+        { role: "system", content: "You are a senior textile and surface pattern designer. Turn the customer's request (often in Turkish) into ONE English prompt for an image model that creates a flat, seamless repeating pattern swatch, like a scanned sheet of premium wallpaper or gift wrap seen straight on. Describe only the motifs, their scale, spacing and rhythm, the art style, line quality and an exact color palette including the background color. Never mention any object, container, box, can, cylinder, packaging, product, room, scene, table, text, letters, logos, brands or people. Reply with the prompt only, under 60 words." },
         { role: "user", content: `Request: ${user}${colors ? `\nBrand colors to respect if they fit: ${colors}` : ""}` }
       ]
     });
@@ -52,10 +52,10 @@ const json = (data, status = 200) =>
 
 function buildPrompt(direction) {
   return [
-    "Seamless repeating surface pattern, flat front view, fills the entire frame edge to edge, for printing on a premium cylindrical tissue box.",
+    "Flat seamless repeating pattern swatch, 2D print design scanned straight on, the pattern covers 100% of the image edge to edge with no background around it.",
     direction,
-    "High-end packaging design, crisp clean shapes, balanced spacing, harmonious colors, sharp details.",
-    "No text, no letters, no words, no logos, no watermark, no product, no box, no mockup, no frame, no border, no people."
+    "Premium wallpaper and gift wrap quality, crisp clean shapes, balanced spacing, harmonious colors, sharp details, even lighting, no shadows.",
+    "Not a photo of an object. No 3D, no perspective, no cylinder, no can, no box, no packaging, no mockup, no product, no table, no frame, no border, no text, no letters, no logo, no watermark, no people."
   ].join(" ");
 }
 
