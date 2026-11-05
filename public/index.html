@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=23">
+<link rel="stylesheet" href="assets/style.css?v=24">
 <script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
@@ -61,7 +61,7 @@
       <li><b>%100</b><span>Bambu lifi</span></li>
       <li><b>3</b><span>Kat</span></li>
       <li><b>50</b><span>Yaprak</span></li>
-      <li><b>Ø 7</b><span>cm, bardaklık uyumlu</span></li>
+      <li><b>Ø 6,8</b><span>cm, bardaklık uyumlu</span></li>
     </ul>
   </div>
 </section>
@@ -145,8 +145,8 @@
             <image id="cLogo" x="-110" y="-30" width="220" height="60" transform="translate(126 205) rotate(-90)" preserveAspectRatio="xMidYMid meet" href="" visibility="hidden"/>
             <g id="cIcons" fill="#d8c38f" font-family="Manrope, sans-serif" font-size="6" font-weight="700" text-anchor="middle" letter-spacing=".4">
               <text x="80" y="296">%100</text><text x="80" y="304">BAMBU</text>
-              <text x="120" y="296">50</text><text x="120" y="304">YAPRAK</text>
-              <text x="160" y="296">3 KATLI</text><text x="160" y="304">PEÇETE</text>
+              <text x="120" y="296" id="cYaprak">50</text><text x="120" y="304">YAPRAK</text>
+              <text x="160" y="296" id="cKat">3 KATLI</text><text x="160" y="304">PEÇETE</text>
             </g>
             <rect x="40" y="60" width="160" height="360" fill="url(#shade)"/>
           </g>
@@ -156,6 +156,7 @@
           <ellipse id="cLabel" cx="120" cy="58" rx="52" ry="10.5" fill="none" stroke="#d8c38f" stroke-width="1.2"/>
           <text id="cLidText" x="120" y="62" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-weight="600" font-size="13" fill="#d8c38f">Solingo</text>
         </svg>
+        <p class="dims" id="dims" aria-live="polite">16 cm · Ø 6,8 cm · 3 katlı · 50 yaprak</p>
       </div>
 
       <form class="options" id="studio" onsubmit="return false">
@@ -169,6 +170,18 @@
             <input type="file" id="upLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
           </div>
           <p class="hint up-note" id="upNote" aria-live="polite">Yüklediğiniz görsel yalnızca bu önizlemede kullanılır; baskı dosyasını teklif sonrası bizimle paylaşırsınız.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Peçete ve kutu boyu</legend>
+          <div class="row2">
+            <label for="s-kat">Kat
+              <select id="s-kat"><option value="3">3 katlı</option><option value="2">2 katlı</option></select>
+            </label>
+            <label for="s-yaprak">Yaprak sayısı
+              <select id="s-yaprak"><option value="50">50 yaprak</option><option value="40">40 yaprak</option></select>
+            </label>
+          </div>
+          <div class="sizes" id="sizes" role="group" aria-label="Kutu boyu"></div>
         </fieldset>
         <fieldset>
           <legend>Kutu ve kapak rengi</legend>
@@ -296,6 +309,6 @@
   <div class="lb-foot"><p id="lbName"></p><a href="#iletisim" class="btn btn-gold btn-sm" id="lbAsk">Bu desen için teklif</a></div>
 </dialog>
 
-<script src="assets/app.js?v=23" defer></script>
+<script src="assets/app.js?v=24" defer></script>
 </body>
 </html>

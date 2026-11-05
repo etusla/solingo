@@ -113,7 +113,7 @@ h1 em,h2 em{font-style:italic;color:var(--gold-ink)}
 .ozel .sec-lead{color:var(--soft)}
 .ozel h2 em{color:var(--gold)}
 .studio{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center;padding:44px;border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(210,188,134,.22)}
-.preview{display:grid;place-items:center;min-height:460px;border-radius:22px;background:radial-gradient(70% 60% at 50% 40%,#f6f2ea,#e3dccd)}
+.preview{display:grid;place-items:center;align-self:start;position:sticky;top:96px;min-height:460px;border-radius:22px;background:radial-gradient(70% 60% at 50% 40%,#f6f2ea,#e3dccd)}
 .preview svg{width:min(260px,70%);height:auto;filter:drop-shadow(0 24px 24px rgba(0,0,0,.18))}
 .preview svg *{transition:fill .35s,stroke .35s}
 .options{display:flex;flex-direction:column;gap:20px}
@@ -129,6 +129,14 @@ h1 em,h2 em{font-style:italic;color:var(--gold-ink)}
 .styles button:hover{transform:translateY(-2px)}
 .styles button[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 3px rgba(210,188,134,.35)}
 .styles .plain{display:grid;place-items:center;background:var(--navy);color:var(--gold);font-size:.68rem;font-weight:700}
+.dims{margin:14px 0 0;text-align:center;font-weight:700;font-size:.9rem;color:var(--navy);letter-spacing:.02em}
+.sizes{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.sizes button{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;min-width:78px;padding:12px 10px 10px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(10,14,32,.4);color:#e8e4d8;transition:border-color .2s,background .2s}
+.sizes button i{display:block;border-radius:5px/3px;border:1.5px solid rgba(210,188,134,.7);margin-bottom:6px}
+.sizes button b{font-size:.9rem}
+.sizes button small{font-size:.74rem;color:var(--soft)}
+.sizes button[aria-pressed="true"]{border-color:var(--gold);background:rgba(210,188,134,.14)}
+.sizes button[aria-pressed="true"] i{background:var(--gold);border-color:var(--gold)}
 .uploads{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .up{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:8px!important;padding:10px 16px;border-radius:999px;border:1px dashed rgba(210,188,134,.7);color:#f2ecdd!important;font-size:.85rem!important;letter-spacing:0!important;cursor:pointer;transition:background .2s}
 .up:hover{background:rgba(210,188,134,.12)}

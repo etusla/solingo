@@ -110,7 +110,25 @@
     ["mozaik", "Mozaik"], ["retro", "Retro"], ["geometrik-mint", "Mint Geometri"], ["geometrik-sari", "Sarı Geometri"],
     ["pembe-ucgen", "Pembe Üçgen"], ["terrazzo", "Terrazzo"], ["lavanta", "Lavanta"], ["kiremit", "Kiremit Zikzak"], ["lila-dalga", "Lila Dalga"]
   ];
-  const st = { body: BODY[0], ink: INK[0], style: STYLES[0], design: null, logo: null };
+  const SIZES = [
+    { h: 14, d: 8.3 }, { h: 14.5, d: 6.8 }, { h: 16, d: 6.8 }, { h: 18, d: 6.8 }
+  ];
+  const st = { body: BODY[0], ink: INK[0], style: STYLES[0], design: null, logo: null, size: SIZES[2] };
+  const num = v => String(v).replace(".", ",");
+  const sizeLabel = s => `${num(s.h)} cm · Ø ${num(s.d)} cm`;
+  const sizes = $("#sizes");
+  sizes.innerHTML = SIZES.map((s, i) => `
+    <button type="button" data-z="${i}" aria-pressed="${s === st.size}" aria-label="${sizeLabel(s)}">
+      <i style="height:${Math.round(s.h * 4.2)}px;width:${Math.round(s.d * 4.2)}px"></i>
+      <b>${num(s.h)} cm</b><small>Ø ${num(s.d)}</small>
+    </button>`).join("");
+  sizes.addEventListener("click", e => {
+    const b = e.target.closest("[data-z]"); if (!b) return;
+    st.size = SIZES[+b.dataset.z];
+    sizes.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    paint();
+  });
+  ["#s-kat", "#s-yaprak"].forEach(s => $(s).addEventListener("change", () => paint()));
   const styleSw = $("#styleSw");
   styleSw.innerHTML = STYLES.map(([id, n], i) => id === "duz"
     ? `<button type="button" class="plain" data-s="${i}" aria-pressed="true" title="${n}"><span>Düz</span></button>`
@@ -178,6 +196,10 @@
     $("#cLidText").textContent = t;
     const len = [...t].length;
     $("#cText").setAttribute("font-size", String(Math.min(46, Math.round(300 / Math.max(len, 1)))));
+    const kat = $("#s-kat").value, yap = $("#s-yaprak").value;
+    $("#cKat").textContent = `${kat} KATLI`;
+    $("#cYaprak").textContent = yap;
+    $("#dims").textContent = `${sizeLabel(st.size)} · ${kat} katlı · ${yap} yaprak`;
     // stil: hazır desenlerin üzerinde logo zaten basılıdır
     const sid = st.style[0], pat = $("#cPat");
     const src = sid === "duz" ? "" : sid === "upload" ? (st.design && st.design.url) : `assets/img/stil/${sid}.webp`;
@@ -203,6 +225,8 @@
       `Stil: ${st.style[0] === "upload" ? "Kendi desenimiz (dosyayı ayrıca ileteceğiz)" : st.style[1]}`,
       `${st.style[0] === "duz" ? "Kutu rengi" : "Kapak rengi"}: ${st.body[0]}`,
       `Baskı rengi: ${st.ink[0]}`,
+      `Kutu boyu: ${sizeLabel(st.size)}`,
+      `Peçete: ${$("#s-kat").value} katlı, ${$("#s-yaprak").value} yaprak`,
       st.logo ? "Logo: Kendi logomuz (dosyayı ayrıca ileteceğiz)" : `Kutu üzerindeki yazı: ${textIn.value.trim() || "Solingo"}`,
       `Tahmini adet: ${$("#s-adet").value}`,
       `Paketleme: ${$("#s-paket").value}`
