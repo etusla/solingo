@@ -4,6 +4,12 @@ name = "solingo"
 main = "worker/index.js"
 compatibility_date = "2026-01-01"
 
+# Alan adları: dağıtımda Worker'a özel alan adı olarak bağlanır (DNS kaydını Cloudflare kendisi oluşturur)
+routes = [
+  { pattern = "solingo.com.tr", custom_domain = true },
+  { pattern = "www.solingo.com.tr", custom_domain = true }
+]
+
 [build]
 command = "npm ci --no-audit --no-fund && npm run build"
 
