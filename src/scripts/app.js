@@ -326,26 +326,13 @@ function prefill(text) {
   m.classList.remove("invalid");
   $("#formOk").hidden = true;
   $("#iletisim").scrollIntoView({ behavior: "smooth" });
-  setTimeout(() => $("#f-ad").focus({ preventScroll: true }), 700);
+  if (!touch) setTimeout(() => $("#f-ad").focus({ preventScroll: true }), 700);
 }
 
 // ---------- form ----------
-const form = $("#form"), err = $("#formErr"), sendB = $("#formSend"), waB = $("#formWa");
+const form = $("#form"), err = $("#formErr"), sendB = $("#formSend");
+const touch = matchMedia("(hover: none)").matches;
 const fields = () => Object.fromEntries(new FormData(form).entries());
-function formText(v) {
-  return [
-    "Merhaba, Solingo hakkında bilgi almak istiyoruz.", "",
-    v.ad ? `Ad Soyad: ${v.ad}` : null, v.firma ? `Firma: ${v.firma}` : null,
-    v.tel ? `Telefon: ${v.tel}` : null, v.eposta ? `E-posta: ${v.eposta}` : null,
-    v.mesaj ? "" : null, v.mesaj || null
-  ].filter(l => l !== null).join("\n");
-}
-// WhatsApp: formda yazılanlar varsa mesaja eklenir, zorunlu alan aranmaz
-waB.addEventListener("click", () => {
-  const v = fields();
-  const filled = v.ad || v.firma || v.mesaj;
-  waB.href = `https://wa.me/${SITE.whatsapp}` + (filled ? `?text=${encodeURIComponent(formText(v))}` : "");
-});
 form.addEventListener("submit", async e => {
   e.preventDefault();
   const req = [...form.querySelectorAll("[required]")];
@@ -357,9 +344,10 @@ form.addEventListener("submit", async e => {
   mail.classList.toggle("invalid", !!badMail || noContact);
   tel.classList.toggle("invalid", noContact);
   if (bad.length || noContact || badMail) {
-    err.textContent = bad.length ? "Lütfen adınızı, firmanızı ve mesajınızı yazın."
-      : badMail ? "E-posta adresini kontrol edin." : "Size ulaşabilmemiz için telefon ya da e-posta yazın.";
-    (bad[0] || (badMail ? mail : tel)).focus({ preventScroll: true });
+    err.textContent = bad.length ? "Ad, firma ve mesaj alanlarını doldurun."
+      : badMail ? "E-posta adresini kontrol edin." : "Telefon ya da e-posta adresinizi yazın.";
+    // dokunmatik ekranda klavye açılıp sayfayı kaydırmasın diye yalnızca masaüstünde odaklanılır
+    if (!touch) (bad[0] || (badMail ? mail : tel)).focus({ preventScroll: true });
     return;
   }
   err.textContent = "";
@@ -367,7 +355,8 @@ form.addEventListener("submit", async e => {
   try {
     const r = await fetch("/api/teklif", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(fields()) });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.ok) throw new Error(d.error || "Talebiniz gönderilemedi. Lütfen tekrar deneyin ya da WhatsApp'tan yazın.");
+    if (!r.ok || !d.ok) throw new Error(d.error || "Talebiniz gönderilemedi. Lütfen tekrar deneyin ya da bizi arayın.");
+    document.activeElement?.blur();
     $("#formOk").hidden = false;
     form.reset();
   } catch (ex) {
@@ -376,7 +365,7 @@ form.addEventListener("submit", async e => {
     sendB.disabled = false; sendB.textContent = "Formu Gönder";
   }
 });
-$("#formAgain").addEventListener("click", () => { $("#formOk").hidden = true; $("#f-ad").focus({ preventScroll: true }); });
+$("#formAgain").addEventListener("click", () => { $("#formOk").hidden = true; if (!touch) $("#f-ad").focus({ preventScroll: true }); });
 form.addEventListener("input", e => {
   if (e.target.value.trim()) e.target.classList.remove("invalid");
   if (err.textContent && !form.querySelector(".invalid")) err.textContent = "";

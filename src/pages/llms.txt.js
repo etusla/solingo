@@ -35,7 +35,7 @@ ${FAQ.map(([q, a]) => `### ${q}\n${a}`).join("\n\n")}
 ## İletişim
 - Web: ${SITE.url}
 - E-posta: ${SITE.email}
-- Telefon / WhatsApp: ${SITE.phone}
+- Telefon: ${SITE.phone}
 - Adres: ${COMPANY.street}, ${COMPANY.district} / ${COMPANY.city}, Türkiye
 `;
   return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } });

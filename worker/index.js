@@ -198,7 +198,7 @@ export async function handleTeklif(request, env) {
     }
   }
   console.log("teklif:", id, { saved, mailed });
-  if (!saved && !mailed) return json({ error: "Talebiniz şu anda kaydedilemedi. Lütfen WhatsApp'tan yazın." }, 503);
+  if (!saved && !mailed) return json({ error: "Talebiniz şu anda kaydedilemedi. Lütfen bizi telefonla arayın." }, 503);
   return json({ ok: true });
 }
 
