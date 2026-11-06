@@ -8,7 +8,6 @@ import {
 const counts = Object.fromEntries(Object.keys(GROUPS).map(k => [k, DESIGNS.filter(d => d.g === k).length]));
 const abs = p => new URL(p, SITE.url).href;
 const orgId = `${SITE.url}/#organization`;
-const productId = `${SITE.url}/#product`;
 
 const jsonld = [
   {
@@ -38,7 +37,9 @@ const jsonld = [
           areaServed: "TR",
           availableLanguage: ["tr"]
         }],
-        brand: { "@type": "Brand", name: "Solingo" }
+        brand: { "@type": "Brand", name: "Solingo" },
+        description: "Solingo; araç bardaklığına oturan silindir kutuda %100 bambu lifinden 3 katlı, 50 yapraklı araç içi peçete üretir. 21 desen ve istediğiniz dizaynda, 100.000 adetten başlayan siparişe özel üretim.",
+        knowsAbout: ["Araç içi peçete", "Bambu peçete", "Silindir peçete kutusu", "Promosyon peçete", "Siparişe özel kutu tasarımı"]
       },
       {
         "@type": "WebSite",
@@ -56,33 +57,8 @@ const jsonld = [
         description: SITE.description,
         inLanguage: "tr-TR",
         isPartOf: { "@id": `${SITE.url}/#website` },
-        about: { "@id": productId },
+        about: { "@id": orgId },
         primaryImageOfPage: abs("/img/arac-signature.webp")
-      },
-      {
-        "@type": "Product",
-        "@id": productId,
-        name: "Solingo Araç İçi Bambu Peçete",
-        description: "Araç bardaklığına tam oturan silindir kutuda %100 bambu lifinden 3 katlı, 50 yapraklı peçete. 21 desen ve istediğiniz dizaynda siparişe özel üretim.",
-        brand: { "@type": "Brand", name: "Solingo" },
-        manufacturer: { "@id": orgId },
-        category: "Araç içi peçete",
-        material: "%100 bambu lifi",
-        image: [abs("/img/arac-signature.webp"), abs("/img/arac-kullanim.webp"), ...DESIGNS.slice(0, 6).map(d => abs(img(d.id)))],
-        additionalProperty: [
-          { "@type": "PropertyValue", name: "Malzeme", value: "%100 bambu" },
-          { "@type": "PropertyValue", name: "Kat", value: "3 katlı (2 katlı seçeneği)" },
-          { "@type": "PropertyValue", name: "Yaprak sayısı", value: "50 yaprak (40 yaprak seçeneği)" },
-          { "@type": "PropertyValue", name: "Kutu boyları", value: SIZES.map(sizeLabel).join("; ") },
-          { "@type": "PropertyValue", name: "Kullanım", value: "Araç bardaklığına yerleşir; kapaktaki oval bölüm bastırılarak açılır" }
-        ],
-        hasVariant: DESIGNS.map(d => ({
-          "@type": "Product",
-          name: `Solingo ${d.name}`,
-          image: abs(img(d.id)),
-          color: d.name,
-          brand: { "@type": "Brand", name: "Solingo" }
-        }))
       },
       {
         "@type": "FAQPage",
