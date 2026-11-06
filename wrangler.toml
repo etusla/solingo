@@ -50,3 +50,8 @@ id = "015d14506a754e16a42fe8c863647636"
 # Worker günlükleri (panelde Observability sekmesi)
 [observability]
 enabled = true
+
+# Teklif formu e-postası: Email Routing'de doğrulanmış adrese gönderilir
+[[send_email]]
+name = "MAIL"
+destination_address = "i.yldz2106@gmail.com"
