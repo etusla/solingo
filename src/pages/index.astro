@@ -17,6 +17,7 @@ const SPECS = [
   ["Saklama", "Güneş ışığından uzakta, serin ve kuru yerde"],
   ["Özel üretim", "100.000 adetten başlayan siparişlerde istediğiniz dizayn"]
 ];
+const CITIES = ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Adana", "Konya", "Gaziantep", "Kocaeli", "Mersin", "Kayseri", "Diyarbakır", "Eskişehir", "Samsun", "Trabzon"];
 const abs = p => new URL(p, SITE.url).href;
 const orgId = `${SITE.url}/#organization`;
 
@@ -51,7 +52,8 @@ const jsonld = [
         }],
         brand: { "@type": "Brand", name: "Solingo" },
         description: "Solingo; araç bardaklığına oturan silindir kutuda %100 bambu lifinden 3 katlı, 50 yapraklı araç içi peçete üretir. 21 desen ve istediğiniz dizaynda, 100.000 adetten başlayan siparişe özel üretim.",
-        knowsAbout: ["Araç içi peçete", "Bambu peçete", "Silindir peçete kutusu", "Promosyon peçete", "Siparişe özel kutu tasarımı"]
+        knowsAbout: ["Araç içi peçete", "Bambu peçete", "Silindir peçete kutusu", "Promosyon peçete", "Kurumsal promosyon ürünleri", "Logolu peçete", "Kurumsal hediye", "Siparişe özel kutu tasarımı"],
+        areaServed: [{ "@type": "Country", name: "Türkiye" }, ...CITIES.map(c => ({ "@type": "City", name: c }))]
       },
       {
         "@type": "WebSite",
@@ -121,14 +123,6 @@ const jsonld = [
   <main id="top">
 
     <section class="hero" aria-labelledby="hero-title">
-      <svg class="lines" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true">
-        <g fill="none" stroke="currentColor" stroke-width="1">
-          <path d="M-10 560 C 180 470, 330 600, 520 470 S 760 330, 820 360"/>
-          <path d="M-10 575 C 180 485, 330 615, 520 485 S 760 345, 820 375"/>
-          <path d="M-10 590 C 180 500, 330 630, 520 500 S 760 360, 820 390"/>
-          <path d="M-10 605 C 180 515, 330 645, 520 515 S 760 375, 820 405"/>
-        </g>
-      </svg>
       <div class="wrap hero-in">
         <div class="hero-copy rv">
           <p class="kicker">Araç içi bambu peçete</p>
@@ -153,13 +147,24 @@ const jsonld = [
       </div>
     </section>
 
+    <section class="statement" aria-label="Kurumsal üretim">
+      <div class="wrap statement-in">
+        <p class="st-lead rv">Solingo, {COMPANY.shortName}’un araç içi peçete markasıdır. Kurumlar için, kendi renk ve dizaynlarıyla üretim yapar.</p>
+        <dl class="st-cols rv">
+          <div><dt>Üretim</dt><dd>100.000 adetten başlayan siparişler; dört kutu ölçüsü, 2 ya da 3 katlı peçete.</dd></div>
+          <div><dt>Tasarım</dt><dd>Kutu rengi, baskı rengi, desen, logo ve kapak etiketi siparişinize göre hazırlanır.</dd></div>
+          <div><dt>Numune</dt><dd>Tasarım onayından sonra numune hazırlanır; üretim numune onayıyla başlar.</dd></div>
+        </dl>
+      </div>
+    </section>
+
     <section class="section konfor" id="konfor" aria-labelledby="konfor-title">
       <div class="wrap konfor-in">
         <figure class="konfor-photo rv">
           <img src="/img/arac-kullanim-800.webp" srcset="/img/arac-kullanim-480.webp 480w, /img/arac-kullanim-800.webp 800w" sizes="(max-width: 820px) 92vw, 540px" alt="Araç bardaklığındaki Solingo kutusundan peçete alınırken" width="800" height="810" loading="lazy" decoding="async">
         </figure>
         <div class="konfor-copy">
-          <p class="kicker dark rv">Sürücü ve yolcu konforu</p>
+          <p class="kicker dark idx rv">Sürücü ve yolcu konforu</p>
           <h2 id="konfor-title" class="rv">Yolculuk boyunca<br><em>yanınızda.</em></h2>
           <p class="sec-lead rv">Solingo, peçeteyi torpidoda aranan bir paket olmaktan çıkarır. Bardaklıkta sabit durur, ihtiyaç anında tek hareketle elinizin altındadır.</p>
           <ul class="features">
@@ -195,7 +200,7 @@ const jsonld = [
     <section class="section collection" id="koleksiyon" aria-labelledby="koleksiyon-title">
       <div class="wrap">
         <div class="sec-head">
-          <p class="kicker dark rv">Koleksiyon</p>
+          <p class="kicker dark idx rv">Koleksiyon</p>
           <h2 id="koleksiyon-title" class="rv">Yirmi bir desen,<br><em>tek Solingo.</em></h2>
           <p class="sec-lead rv">Sade çizgilerden canlı çiçek desenlerine; her kutu aynı kalite ve aynı ölçüde. Bir desene dokunarak yakından inceleyebilirsiniz.</p>
         </div>
@@ -225,7 +230,7 @@ const jsonld = [
     <section class="section seri" id="ornekler" aria-labelledby="ornekler-title">
       <div class="wrap">
         <div class="sec-head">
-          <p class="kicker dark rv">Tasarım Örnekleri</p>
+          <p class="kicker dark idx rv">Tasarım Örnekleri</p>
           <h2 id="ornekler-title" class="rv">Her kutuya<br><em>bir hikâye.</em></h2>
           <p class="sec-lead rv">Yaldızlı lüks çizgilerden suluboya çiçeklere, modern geometriden çocuk illüstrasyonlarına; dört kutu boyunda üretilebilecek tasarımlardan bir seçki.</p>
         </div>
@@ -264,7 +269,7 @@ const jsonld = [
     <section class="section ozel" id="ozel" aria-labelledby="ozel-title">
       <div class="wrap">
         <div class="sec-head">
-          <p class="kicker rv">Siparişe özel üretim</p>
+          <p class="kicker idx rv">Siparişe özel üretim</p>
           <h2 id="ozel-title" class="rv">Renginizi seçin,<br><em>kutunuzu biz üretelim.</em></h2>
           <p class="sec-lead rv">Deseninizi yapay zekâyla tasarlayın, koleksiyondan seçin ya da kendi görselinizi yükleyin. Ölçüyü ve renkleri belirleyin; seçiminiz teklif formuna aktarılır.</p>
         </div>
@@ -446,7 +451,7 @@ const jsonld = [
     <section class="section process" aria-labelledby="process-title">
       <div class="wrap">
         <div class="sec-head">
-          <p class="kicker dark rv">Çalışma şeklimiz</p>
+          <p class="kicker dark idx rv">Çalışma şeklimiz</p>
           <h2 id="process-title" class="rv">Talebinizden teslimata<br><em>dört adımda.</em></h2>
         </div>
         <ol class="steps">
@@ -461,7 +466,7 @@ const jsonld = [
     <section class="section faq" id="sss" aria-labelledby="sss-title">
       <div class="wrap faq-in">
         <div class="sec-head">
-          <p class="kicker dark rv">Sıkça sorulan sorular</p>
+          <p class="kicker dark idx rv">Sıkça sorulan sorular</p>
           <h2 id="sss-title" class="rv">Merak<br><em>edilenler.</em></h2>
         </div>
         <div class="faq-list">
@@ -484,7 +489,7 @@ const jsonld = [
     <section class="section contact" id="iletisim" aria-labelledby="iletisim-title">
       <div class="wrap contact-in">
         <div class="c-copy">
-          <p class="kicker dark rv">İletişim</p>
+          <p class="kicker dark idx rv">İletişim</p>
           <h2 id="iletisim-title" class="rv">Teklif ve<br><em>numune talebi.</em></h2>
           <p class="sec-lead rv">Formu doldurun, size en kısa sürede dönüş yapalım. Dilerseniz doğrudan da ulaşabilirsiniz.</p>
           <ul class="direct rv">

@@ -67,7 +67,7 @@ export const PAGES = [
   },
   {
     slug: "kurumsal-promosyon-pecete",
-    nav: "Kurumsal ve Promosyon",
+    nav: "Kurumsal Üretim",
     title: "Kurumsal Promosyon Peçete: İstediğiniz Dizaynda Üretim | Solingo",
     description: "Kurumsal ve promosyon amaçlı araç içi peçete: kutu rengi, desen, logo ve ölçü siparişe göre belirlenir. 100.000 adetten başlayan özel üretim için teklif alın.",
     kicker: "Kurumsal",
