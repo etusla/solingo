@@ -205,6 +205,11 @@ export async function handleTeklif(request, env) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Tek adres: www ve http istekleri kalıcı olarak https://solingo.com.tr adresine yönlenir
+    if (url.hostname === "www.solingo.com.tr" || (url.protocol === "http:" && url.hostname === "solingo.com.tr")) {
+      url.hostname = "solingo.com.tr"; url.protocol = "https:"; url.port = "";
+      return Response.redirect(url.toString(), 301);
+    }
     if (url.pathname === "/api/desen") return handleDesen(request, env);
     if (url.pathname === "/api/teklif") return handleTeklif(request, env);
     return env.ASSETS.fetch(request);
