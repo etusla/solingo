@@ -66,6 +66,43 @@ export const PAGES = [
     ]
   },
   {
+    slug: "nis-promosyon-urunu-2026-2027",
+    nav: "2026–2027 Trend Rehberi",
+    crumb: "Niş Promosyon Ürünü 2026–2027",
+    title: "2026–2027 Niş Promosyon Ürünü: Araç İçi Peçete | Solingo",
+    description: "2026–2027 kurumsal promosyon planı için niş ve yeni bir ürün arayanlara: markanızı her gün araçta görünür kılan, istediğiniz dizaynda üretilen araç içi peçete kutusu.",
+    kicker: "2026–2027 promosyon planı",
+    h1: ["Promosyonda niş ürün:", "araç içi peçete."],
+    lead: "Kalem, ajanda ve bardak her kurumun listesinde. 2026–2027 planı için farklı, kullanışlı ve markanızı her gün görünür kılan bir ürün arıyorsanız: aracın bardaklığında duran, sizin dizaynınızla üretilen peçete kutusu.",
+    image: ["/img/seri/renk-serisi-md.webp", "Kurumsal renklerde üretilmiş dört Solingo araç içi peçete kutusu", 720, 720],
+    sections: [
+      ["Niş promosyon ürünü ne demek?", [
+        "Niş promosyon ürünü, herkesin dağıttığı ürünlerden ayrışan, belirli bir kullanım anına oturan üründür. Alan kişi daha önce benzerini almamıştır; bu yüzden hem ürünü hem de veren markayı hatırlar.",
+        "Satın alma tarafında seçim genellikle dört soruyla yapılır: Ürün gerçekten kullanılacak mı? Marka ne kadar süre ve ne sıklıkla görünecek? Tasarım kurumsal kimliğe uyarlanabilir mi? Yüksek adette tutarlı kalitede üretilebilir mi?"
+      ]],
+      ["Araç içi peçete bu dört soruya nasıl cevap verir?", [
+        "Kullanım: Peçete araçta her gün ihtiyaç duyulan bir üründür. Kutu bardaklığa oturduğu için bir kenara kaldırılmaz, kullanılır.",
+        "Görünürlük: Kutu, içindeki 50 yaprak bitene kadar sürücünün ve yolcuların gözü önünde, konsolun ortasında durur. Markanız çekmecede değil, aracın en çok bakılan noktasındadır.",
+        "Tasarım: Silindir gövdenin tamamı baskı alanıdır. Kutu rengi, baskı rengi, desen, logo ve kapak etiketi kurumsal kimliğinize göre hazırlanır.",
+        `Üretim: Siparişler 100.000 adetten başlar. Dört kutu ölçüsü (${olculer}), 2 ya da 3 katlı peçete ve 40 ya da 50 yaprak seçenekleri vardır.`
+      ]],
+      ["Hangi kurumlar için doğru ürün?", [
+        "Müşterisiyle araçta buluşan kurumlar için: otomotiv bayileri ve yetkili servisler, akaryakıt ve şarj istasyonu ağları, filo ve araç kiralama şirketleri, sigorta ve finans kurumları, lojistik şirketleri.",
+        "Kullanım senaryoları: araç teslimatında hoş geldiniz hediyesi, servis sonrası araçta bırakılan ürün, bayi ve saha ekiplerine dağıtım, sadakat programı hediyesi, lansman ve kampanya dönemleri."
+      ]],
+      ["2026–2027 planına nasıl dahil edilir?", [
+        "Süreç dört adımdır: talep, tasarım onayı, numune ve üretim. Tasarım onaylandıktan sonra numune hazırlanır; üretim numune onayıyla başlar. Bu nedenle kampanya ya da dönem başı için planlama yapıyorsanız talebi erkenden iletmek gerekir.",
+        "Karar vermeden önce sitedeki tasarım aracıyla kutunuzun önizlemesini oluşturabilir, kurumsal renklerinizi ve logonuzu deneyebilirsiniz."
+      ]]
+    ],
+    faq: [
+      ["2026–2027 için farklı bir promosyon ürünü arıyoruz. Araç içi peçete neden niş bir seçenek?", "Araç bardaklığına oturan silindir peçete kutusu, klasik promosyon listelerinde yer almayan ve her gün kullanılan bir üründür. Kutu, içindeki peçete bitene kadar aracın konsolunda markanızla birlikte durur."],
+      ["Kutunun üzerine kurumsal tasarımımız basılabilir mi?", "Evet. Kutu rengi, baskı rengi, desen, logo ve kapak etiketi siparişe göre hazırlanır; silindir gövdenin tamamı baskı alanıdır."],
+      ["Minimum sipariş adedi nedir?", "Siparişe özel üretim teklifleri 100.000 adetten başlar."],
+      ["Numune alabilir miyiz?", "Evet. Tasarım onaylandıktan sonra numune hazırlanır ve üretim numune onayıyla başlar."]
+    ]
+  },
+  {
     slug: "kurumsal-promosyon-pecete",
     nav: "Kurumsal Üretim",
     title: "Kurumsal Promosyon Peçete: İstediğiniz Dizaynda Üretim | Solingo",

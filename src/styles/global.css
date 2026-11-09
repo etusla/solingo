@@ -445,6 +445,21 @@ main{counter-reset:sec}
 .guide-more{border-radius:4px}
 .guide-more a{border-radius:3px}
 
+/* tasarım aracı: sitenin geri kalanıyla aynı keskin çizgi */
+.preview{border-radius:4px}
+.wiz-nav{border-radius:4px}
+.wiz-nav button{border-radius:3px}
+.ai-hero{border-radius:4px;background:rgba(255,255,255,.03)}
+.ai-hero textarea,.field input{border-radius:3px}
+.ai-ideas button{border-radius:3px}
+.thumbs button{border-radius:3px}
+.alt{border-radius:4px}
+.sizes button{border-radius:4px}
+.seg{border-radius:4px}
+.seg button{border-radius:3px}
+.summary{border-radius:4px}
+.studio .btn{border-radius:3px}
+
 @media (max-width:1000px){
   .studio{grid-template-columns:1fr;padding:22px;gap:24px}
   .preview{position:static;min-height:0;padding:22px 16px 18px}
@@ -488,7 +503,7 @@ main{counter-reset:sec}
   .foot-in>div:first-child{grid-column:1/-1}
 }
 @media (max-width:600px){
-  .studio{padding:14px;border-radius:22px}
+  .studio{padding:14px}
   .alts{grid-template-columns:1fr}
   .alt{flex-direction:row;align-items:center;gap:12px}
   .alt svg{margin:0}
