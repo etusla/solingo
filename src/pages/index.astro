@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
 import {
   SITE, COMPANY, GROUPS, DESIGNS, STYLES, BODY, INK, SIZES, DEFAULT_SIZE, QUANTITIES, FAQ,
   img, imgMd, imgSm, num, sizeLabel, TURNSTILE_SITE_KEY, SERIES, RENK_SERISI, seri, seriSm
@@ -70,6 +71,16 @@ const jsonld = [
         isPartOf: { "@id": `${SITE.url}/#website` },
         about: { "@id": orgId },
         primaryImageOfPage: abs("/img/arac-signature.webp")
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${SITE.url}/#koleksiyon`,
+        name: "Solingo Koleksiyonu",
+        numberOfItems: DESIGNS.length,
+        itemListElement: DESIGNS.map((d, i) => ({
+          "@type": "ListItem", position: i + 1, name: `Solingo ${d.name}`,
+          item: { "@type": "ImageObject", contentUrl: abs(img(d.id)), name: `Solingo ${d.name}`, caption: `Solingo ${d.name} desenli araç içi peçete kutusu` }
+        }))
       },
       {
         "@type": "FAQPage",
@@ -270,11 +281,13 @@ const jsonld = [
                   <stop offset="1" stop-color="#000" stop-opacity=".42"/>
                 </linearGradient>
                 <clipPath id="bodyClip"><path d="M40 70 V400 A80 16 0 0 0 200 400 V70 Z"/></clipPath>
+                <clipPath id="rimClip"><path d="M37 58 V82 A83 17 0 0 0 203 82 V58 Z"/></clipPath>
+                <clipPath id="lidClip"><ellipse cx="120" cy="58" rx="83" ry="17"/></clipPath>
               </defs>
               <ellipse cx="120" cy="414" rx="96" ry="14" fill="#000" opacity=".16"/>
               <g clip-path="url(#bodyClip)">
                 <rect id="cBody" x="40" y="60" width="160" height="360" fill="#1d2547"/>
-                <image id="cPat" x="40" y="78" width="160" height="342" preserveAspectRatio="none" href="" visibility="hidden"/>
+                <image id="cPat" x="40" y="60" width="160" height="360" preserveAspectRatio="none" href="" visibility="hidden"/>
                 <g id="cWaves" fill="none" stroke-width="1.4" stroke="#d2bc86" opacity=".9">
                   <path d="M30 420 C 80 380, 120 410, 150 360 S 190 300, 215 300"/>
                   <path d="M30 410 C 80 370, 120 400, 150 350 S 190 290, 215 290"/>
@@ -293,8 +306,11 @@ const jsonld = [
                 <rect x="40" y="60" width="160" height="360" fill="url(#shade)"/>
               </g>
               <path id="cRim" d="M37 58 V82 A83 17 0 0 0 203 82 V58 Z" fill="#1d2547"/>
+              <image id="cPatRim" clip-path="url(#rimClip)" x="37" y="60" width="166" height="360" preserveAspectRatio="none" href="" visibility="hidden"/>
               <path d="M37 58 V82 A83 17 0 0 0 203 82 V58 Z" fill="url(#shade)"/>
               <ellipse id="cLid" cx="120" cy="58" rx="83" ry="17" fill="#232c55"/>
+              <image id="cPatLid" clip-path="url(#lidClip)" x="37" y="41" width="166" height="360" preserveAspectRatio="none" href="" visibility="hidden"/>
+              <ellipse id="cLidLight" cx="120" cy="58" rx="83" ry="17" fill="#fff" opacity=".12" visibility="hidden"/>
               <ellipse id="cLabel" cx="120" cy="58" rx="52" ry="10.5" fill="none" stroke="#d2bc86" stroke-width="1.2"/>
               <text id="cLidText" x="120" y="62" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-weight="600" font-size="13" fill="#d2bc86">Solingo</text>
             </svg>
@@ -502,29 +518,7 @@ const jsonld = [
 
   </main>
 
-  <footer class="footer">
-    <div class="wrap foot-in">
-      <div>
-        <a href="/" class="logo">Solingo<sup>®</sup></a>
-        <p>Araç içi bambu peçete.<br>%100 bambu · 3 katlı · 50 yaprak</p>
-        <p class="company">{COMPANY.legalName}<br>{COMPANY.street}<br>{COMPANY.district} / {COMPANY.city}</p>
-      </div>
-      <nav aria-label="Alt menü">
-        <a href="#konfor">Ürün</a>
-        <a href="#koleksiyon">Koleksiyon</a>
-        <a href="#ornekler">Tasarım Örnekleri</a>
-        <a href="#ozel">Özel Üretim</a>
-        <a href="#sss">Sıkça Sorulan Sorular</a>
-        <a href="#iletisim">İletişim</a>
-        <a href="/kvkk">Kişisel Verilerin Korunması</a>
-      </nav>
-      <div class="foot-contact">
-        <a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
-      </div>
-    </div>
-    <div class="wrap foot-bottom">© {new Date().getFullYear()} Solingo, bir {COMPANY.shortName} markasıdır. Tüm hakları saklıdır.</div>
-  </footer>
+  <Footer home />
 
   <dialog class="lb" id="lb" aria-label="Desen">
     <button class="lb-x" type="button" data-close aria-label="Kapat">✕</button>

@@ -1,0 +1,102 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../data/site.js";
+import { PAGES } from "../data/pages.js";
+
+export function getStaticPaths() {
+  return PAGES.map(p => ({ params: { slug: p.slug }, props: { p } }));
+}
+const { p } = Astro.props;
+const url = `${SITE.url}/${p.slug}`;
+const others = PAGES.filter(o => o.slug !== p.slug);
+const today = new Date().toISOString().slice(0, 10);
+const jsonld = [{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": `${url}#article`,
+      headline: p.h1.join(" "),
+      description: p.description,
+      image: new URL(p.image[0], SITE.url).href,
+      inLanguage: "tr-TR",
+      datePublished: "2026-11-09",
+      dateModified: today,
+      author: { "@id": `${SITE.url}/#organization` },
+      publisher: { "@id": `${SITE.url}/#organization` },
+      mainEntityOfPage: url
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Solingo", item: `${SITE.url}/` },
+        { "@type": "ListItem", position: 2, name: p.nav, item: url }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: p.faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } }))
+    },
+    { "@type": "Organization", "@id": `${SITE.url}/#organization`, name: "Solingo", url: SITE.url, logo: `${SITE.url}/icon-512.png` }
+  ]
+}];
+---
+<Base title={p.title} description={p.description} path={`/${p.slug}`} jsonld={jsonld}>
+  <a href="#icerik" class="skip">İçeriğe geç</a>
+  <header class="nav solid">
+    <div class="wrap nav-in">
+      <a href="/" class="logo" aria-label="Solingo ana sayfa">Solingo<sup>®</sup></a>
+      <nav aria-label="Ana menü">
+        <a href="/#koleksiyon">Koleksiyon</a>
+        <a href="/#ozel">Özel Üretim</a>
+        <a href="/#iletisim" class="nav-cta">Teklif Alın</a>
+      </nav>
+    </div>
+  </header>
+  <main class="guide" id="icerik">
+    <article class="wrap">
+      <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Solingo</a><span aria-hidden="true">›</span><span>{p.nav}</span></nav>
+      <div class="guide-head">
+        <div>
+          <p class="kicker dark">{p.kicker}</p>
+          <h1>{p.h1[0]}<br><em>{p.h1[1]}</em></h1>
+          <p class="sec-lead">{p.lead}</p>
+          <div class="actions">
+            <a href="/#iletisim" class="btn btn-navy">Teklif Alın</a>
+            <a href="/#koleksiyon" class="btn btn-outline">Koleksiyonu İnceleyin</a>
+          </div>
+        </div>
+        <figure><img src={p.image[0]} alt={p.image[1]} width={p.image[2]} height={p.image[3]} fetchpriority="high"></figure>
+      </div>
+      <div class="guide-body">
+        {p.sections.map(([h, ps]) => (
+          <section>
+            <h2>{h}</h2>
+            {ps.map(t => <p>{t}</p>)}
+          </section>
+        ))}
+        <section>
+          <h2>Sıkça sorulan sorular</h2>
+          <div class="faq-list">
+            {p.faq.map(([q, a]) => (
+              <details open>
+                <summary><h3>{q}</h3></summary>
+                <p>{a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+        <aside class="guide-more">
+          <h2>İlgili sayfalar</h2>
+          <ul>
+            {others.map(o => <li><a href={`/${o.slug}`}>{o.nav}</a></li>)}
+            <li><a href="/#ozel">Kutunuzu tasarlayın</a></li>
+            <li><a href="/#sss">Tüm sorular</a></li>
+          </ul>
+        </aside>
+      </div>
+    </article>
+  </main>
+  <Footer />
+</Base>

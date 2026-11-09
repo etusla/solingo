@@ -1,4 +1,5 @@
 import { SITE, DESIGNS, SERIES, img, seri } from "../data/site.js";
+import { PAGES } from "../data/pages.js";
 
 export function GET() {
   const lastmod = new Date().toISOString().slice(0, 10);
@@ -17,6 +18,18 @@ export function GET() {
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 ${images}
+  </url>
+${PAGES.map(p => `  <url>
+    <loc>${SITE.url}/${p.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image><image:loc>${SITE.url}${p.image[0]}</image:loc><image:title>${p.image[1]}</image:title></image:image>
+  </url>`).join("\n")}
+  <url>
+    <loc>${SITE.url}/kvkk</loc>
+    <lastmod>${lastmod}</lastmod>
+    <priority>0.2</priority>
   </url>
 </urlset>
 `;

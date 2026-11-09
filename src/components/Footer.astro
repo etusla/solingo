@@ -1,0 +1,30 @@
+---
+import { SITE, COMPANY } from "../data/site.js";
+import { PAGES } from "../data/pages.js";
+const { home = false } = Astro.props;
+const h = home ? "" : "/";
+---
+<footer class="footer">
+  <div class="wrap foot-in">
+    <div>
+      <a href="/" class="logo">Solingo<sup>®</sup></a>
+      <p>Araç içi bambu peçete.<br>%100 bambu · 3 katlı · 50 yaprak</p>
+      <p class="company">{COMPANY.legalName}<br>{COMPANY.street}<br>{COMPANY.district} / {COMPANY.city}</p>
+    </div>
+    <nav aria-label="Alt menü">
+      <a href={`${h}#konfor`}>Ürün</a>
+      <a href={`${h}#koleksiyon`}>Koleksiyon</a>
+      <a href={`${h}#ornekler`}>Tasarım Örnekleri</a>
+      <a href={`${h}#ozel`}>Özel Üretim</a>
+      <a href={`${h}#sss`}>Sıkça Sorulan Sorular</a>
+      <a href={`${h}#iletisim`}>İletişim</a>
+    </nav>
+    <nav aria-label="Rehber">
+      {PAGES.map(p => <a href={`/${p.slug}`}>{p.nav}</a>)}
+      <a href="/kvkk">Kişisel Verilerin Korunması</a>
+      <a href={`tel:${SITE.phoneHref}`}>{SITE.phone}</a>
+      <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    </nav>
+  </div>
+  <div class="wrap foot-bottom">© {new Date().getFullYear()} Solingo, bir {COMPANY.shortName} markasıdır. Tüm hakları saklıdır.</div>
+</footer>

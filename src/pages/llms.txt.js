@@ -1,4 +1,5 @@
 import { SITE, COMPANY, DESIGNS, GROUPS, SIZES, SERIES, FAQ, sizeLabel } from "../data/site.js";
+import { PAGES } from "../data/pages.js";
 
 // Yapay zekâ arama motorları için sitenin düz metin özeti (llms.txt)
 export function GET() {
@@ -8,6 +9,11 @@ export function GET() {
 > Solingo, araç içinde kullanılmak üzere tasarlanmış bambu peçete markasıdır. Silindir kutu araç bardaklığına yerleşir; içinde %100 bambu lifinden 3 katlı, 50 yapraklı peçete bulunur. Kutular 21 desende sunulur ve siparişe özel olarak istediğiniz dizaynda üretilir.
 
 Solingo, ${COMPANY.legalName} markasıdır.
+
+## Sayfalar
+- [Ana sayfa](${SITE.url}/): Ürün, koleksiyon, tasarım aracı ve teklif formu
+${PAGES.map(p => `- [${p.nav}](${SITE.url}/${p.slug}): ${p.description}`).join("\n")}
+- [Tam metin](${SITE.url}/llms-full.txt): Tüm sayfaların düz metni
 
 ## Ürün
 - Malzeme: %100 bambu lifi

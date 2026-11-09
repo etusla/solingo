@@ -277,6 +277,14 @@ function paint() {
   attr("#cPat", "href", src);
   attr("#cPat", "visibility", src ? "visible" : "hidden");
   attr("#cPat", "preserveAspectRatio", st.custom ? "xMidYMid slice" : "none");
+  // desen kapağı ve kapak kenarını da kaplar; kapak gövdeden ayrı renkte kalmaz
+  ["#cPatRim", "#cPatLid"].forEach(q => {
+    attr(q, "href", src);
+    attr(q, "visibility", src ? "visible" : "hidden");
+    attr(q, "preserveAspectRatio", st.custom ? "xMidYMid slice" : "none");
+  });
+  attr("#cLidLight", "visibility", src ? "visible" : "hidden");
+  attr("#cLabel", "fill", src ? (st.ink[1] === "#1b1b1e" ? "#f5efe0" : shade(st.body[1], 0.85)) : "none");
   attr("#cWaves", "visibility", plain ? "visible" : "hidden");
   attr("#cIcons", "visibility", plain ? "visible" : "hidden");
   attr("#cLogo", "href", st.logo || "");
