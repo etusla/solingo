@@ -373,6 +373,18 @@ form.addEventListener("input", e => {
 
 // ---------- menü ve giriş animasyonu ----------
 const nav = $("#nav");
+const navT = $("#navToggle"), mnav = $("#mnav");
+function menu(open) {
+  nav.classList.toggle("open", open);
+  mnav.hidden = !open;
+  navT.setAttribute("aria-expanded", String(open));
+  navT.setAttribute("aria-label", open ? "Menüyü kapat" : "Menüyü aç");
+}
+navT.addEventListener("click", () => menu(mnav.hidden));
+mnav.addEventListener("click", e => { if (e.target.closest("a")) menu(false); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !mnav.hidden) { menu(false); navT.focus(); } });
+document.addEventListener("click", e => { if (!mnav.hidden && !e.target.closest("#nav")) menu(false); });
+window.addEventListener("resize", () => { if (!mnav.hidden && innerWidth > 820) menu(false); });
 const onScroll = () => nav.classList.toggle("solid", window.scrollY > 30);
 window.addEventListener("scroll", onScroll, { passive: true });
 onScroll();
