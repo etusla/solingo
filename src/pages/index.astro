@@ -147,6 +147,8 @@ const jsonld = [
       </div>
     </section>
 
+    <div class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
     <section class="statement" aria-label="Kurumsal üretim">
       <div class="wrap statement-in">
         <p class="st-lead rv">Solingo, {COMPANY.shortName}’un araç içi peçete markasıdır. Kurumlar için, kendi renk ve dizaynlarıyla üretim yapar.</p>
@@ -155,6 +157,15 @@ const jsonld = [
           <div><dt>Tasarım</dt><dd>Kutu rengi, baskı rengi, desen, logo ve kapak etiketi siparişinize göre hazırlanır.</dd></div>
           <div><dt>Numune</dt><dd>Tasarım onayından sonra numune hazırlanır; üretim numune onayıyla başlar.</dd></div>
         </dl>
+      </div>
+      <div class="wrap">
+        <h2 class="st-steps-title rv" id="process-title">Talebinizden teslimata dört adım</h2>
+        <ol class="steps" aria-labelledby="process-title">
+          <li class="rv"><span>1</span><h3>Talep</h3><p>Desen, renk ve adet ihtiyacınızı bize iletin.</p></li>
+          <li class="rv"><span>2</span><h3>Tasarım onayı</h3><p>Kutunuzun görselini hazırlar, onayınıza sunarız.</p></li>
+          <li class="rv"><span>3</span><h3>Numune</h3><p>Üretim öncesinde örnek ürünü inceleyebilirsiniz.</p></li>
+          <li class="rv"><span>4</span><h3>Üretim ve teslimat</h3><p>Planlanan takvimde üretilip adresinize teslim edilir.</p></li>
+        </ol>
       </div>
     </section>
 
@@ -188,13 +199,20 @@ const jsonld = [
         </div>
       </div>
       <div class="wrap">
-        <div class="specs rv">
-          <h3>Teknik bilgiler</h3>
+        <details class="specs rv" id="specs" open>
+          <summary><h3>Teknik bilgiler</h3></summary>
           <dl>
             {SPECS.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
           </dl>
-        </div>
+        </details>
       </div>
+    </section>
+
+    <section class="colorband" aria-label="Siparişe özel üretim">
+      <a href="#ozel" style="--c:#f2c522;--t:#151b38"><small>Kutu rengi</small><b>Sizin<br>renginiz.</b></a>
+      <a href="#ozel" style="--c:#2346c8;--t:#fff"><small>Desen</small><b>Sizin<br>deseniniz.</b></a>
+      <a href="#ozel" style="--c:#e0602c;--t:#fff"><small>Logo ve yazı</small><b>Sizin<br>logonuz.</b></a>
+      <a href="#ozel" style="--c:#3a8a4f;--t:#fff"><small>Dört kutu boyu</small><b>Sizin<br>ölçünüz.</b></a>
     </section>
 
     <section class="section collection" id="koleksiyon" aria-labelledby="koleksiyon-title">
@@ -208,7 +226,7 @@ const jsonld = [
           <button type="button" class="filter" data-f="all" aria-pressed="true">Tümü <small>{DESIGNS.length}</small></button>
           {Object.entries(GROUPS).map(([k, v]) => <button type="button" class="filter" data-f={k} aria-pressed="false">{v} <small>{counts[k]}</small></button>)}
         </div>
-        <ul class="grid" id="grid" role="list">
+        <ul class="grid collapsed" id="grid" role="list">
           {DESIGNS.map((d, i) => (
             <li class="card" data-i={i} data-g={d.g} data-id={d.id} data-name={d.name}>
               <button type="button" class="card-btn">
@@ -224,6 +242,8 @@ const jsonld = [
             </a>
           </li>
         </ul>
+        <div class="grid-more"><button type="button" class="btn btn-outline" id="gridMore">Tüm desenleri göster ({DESIGNS.length})</button></div>
+        <p class="swipe-hint" aria-hidden="true">Kaydırın →</p>
       </div>
     </section>
 
@@ -251,6 +271,10 @@ const jsonld = [
           </div>
         </article>
 
+        <div class="strip-nav" aria-hidden="true">
+          <span>Örnek tasarımlar</span>
+          <button type="button" data-dir="-1" tabindex="-1">‹</button><button type="button" data-dir="1" tabindex="-1">›</button>
+        </div>
         <ul class="arches" id="arches" role="list">
           {SERIES.map((d, i) => (
             <li class="arch rv" data-i={i}>
@@ -445,21 +469,6 @@ const jsonld = [
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="section process" aria-labelledby="process-title">
-      <div class="wrap">
-        <div class="sec-head">
-          <p class="kicker dark idx rv">Çalışma şeklimiz</p>
-          <h2 id="process-title" class="rv">Talebinizden teslimata<br><em>dört adımda.</em></h2>
-        </div>
-        <ol class="steps">
-          <li class="rv"><span>1</span><h3>Talep</h3><p>Desen, renk ve adet ihtiyacınızı bize iletin.</p></li>
-          <li class="rv"><span>2</span><h3>Tasarım onayı</h3><p>Kutunuzun görselini hazırlar, onayınıza sunarız.</p></li>
-          <li class="rv"><span>3</span><h3>Numune</h3><p>Üretim öncesinde örnek ürünü inceleyebilirsiniz.</p></li>
-          <li class="rv"><span>4</span><h3>Üretim ve teslimat</h3><p>Planlanan takvimde üretilip adresinize teslim edilir.</p></li>
-        </ol>
       </div>
     </section>
 

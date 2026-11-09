@@ -9,9 +9,12 @@ const cta = grid.querySelector(".cta");
 let visible = cards.map((_, i) => i);
 
 // son satırdaki boşluğu "Size özel" kartı doldurur
+const more = $("#gridMore");
 function fitCta() {
   const cols = getComputedStyle(grid).gridTemplateColumns.split(" ").length;
-  const rem = cols - (visible.length % cols);
+  // kapalıyken yalnızca ilk iki satır görünür
+  const shown = grid.classList.contains("collapsed") ? Math.min(visible.length, cols * 2) : visible.length;
+  const rem = cols - (shown % cols);
   cta.style.gridColumn = `span ${rem === 0 ? cols : rem}`;
   const ph = grid.querySelector(".card:not([hidden]):not(.cta) .ph");
   if (ph) cta.style.setProperty("--h", ph.offsetHeight + "px");
@@ -19,9 +22,13 @@ function fitCta() {
 window.addEventListener("resize", fitCta);
 window.addEventListener("load", fitCta);
 fitCta();
+function expand() { grid.classList.remove("collapsed"); more.parentElement.hidden = true; }
+more.addEventListener("click", () => { expand(); fitCta(); });
 
 filters.addEventListener("click", e => {
   const b = e.target.closest("[data-f]"); if (!b) return;
+  expand();
+  grid.scrollTo({ left: 0 });
   const f = b.dataset.f;
   filters.querySelectorAll(".filter").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   visible = [];
@@ -378,6 +385,15 @@ form.addEventListener("input", e => {
   if (e.target.value.trim()) e.target.classList.remove("invalid");
   if (err.textContent && !form.querySelector(".invalid")) err.textContent = "";
 });
+
+// ---------- tasarım örnekleri şeridi ve teknik bilgiler ----------
+const arches = $("#arches");
+document.querySelector(".strip-nav").addEventListener("click", e => {
+  const b = e.target.closest("[data-dir]"); if (!b) return;
+  arches.scrollBy({ left: +b.dataset.dir * arches.clientWidth * 0.75, behavior: "smooth" });
+});
+// telefonda teknik tablo kapalı başlar, dokununca açılır
+if (matchMedia("(max-width: 600px)").matches) $("#specs").open = false;
 
 // ---------- menü ve giriş animasyonu ----------
 const nav = $("#nav");
